@@ -32,9 +32,9 @@ updates:
         update-types:
           - "version-update:semver-major"
     reviewers:
-      - "YOUR_GITHUB_USERNAME"  # Replace with actual username
+      - "MarlonDSC"  # Replace with actual username
     assignees:
-      - "YOUR_GITHUB_USERNAME"  # Replace with actual username
+      - "MarlonDSC"  # Replace with actual username
 
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
@@ -51,6 +51,6 @@ updates:
       prefix: "ci"
       include: "scope"
     reviewers:
-      - "YOUR_GITHUB_USERNAME"  # Replace with actual username
+      - "MarlonDSC"  # Replace with actual username
     assignees:
-      - "YOUR_GITHUB_USERNAME"  # Replace with actual username
+      - "MarlonDSC"  # Replace with actual username
