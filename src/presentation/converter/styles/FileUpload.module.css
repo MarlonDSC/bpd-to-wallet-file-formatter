@@ -18,6 +18,9 @@
 
 /* Drop Zone */
 .dropZone {
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
   border: 2px dashed #646cff;
   border-radius: 12px;
   padding: 3rem 2rem;
