@@ -36,5 +36,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.projectKey=${{ github.repository_owner }}_bpd-to-wallet-file-formatter
-            -Dsonar.organization=${{ github.repository_owner }}
+            -Dsonar.projectKey=CodeFlow-Dynamics_bpd-to-wallet-file-formatter
+            -Dsonar.organization=codeflow-dynamics
