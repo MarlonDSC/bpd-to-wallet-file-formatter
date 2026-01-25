@@ -17,6 +17,16 @@ coverage
 .nyc_output
 playwright-report
 test-results
+tests/screenshots
+
+# Visual regression test snapshots (baseline images are committed)
+# Only ignore diff and actual images, not the expected snapshots
+**/*-actual.png
+**/*-diff.png
+tests/features/step-definitions/**/*-actual.png
+tests/features/step-definitions/**/*-diff.png
+tests/features/__screenshots__/**/*-actual.png
+tests/features/__screenshots__/**/*-diff.png
 
 # Editor directories and files
 .vscode/*
