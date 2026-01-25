@@ -137,6 +137,7 @@
   cursor: pointer;
   transition: background-color 0.25s, transform 0.1s;
   margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .convertButton:hover {
@@ -154,7 +155,8 @@
 }
 
 .csvStatus {
-  margin-top: 1rem;
+  display: block;
+  margin-top: 0;
   padding: 1rem;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -181,6 +183,7 @@
 }
 
 .csvStatusError {
+  display: block;
   margin-top: 1rem;
   padding: 1rem;
   border-radius: 8px;
