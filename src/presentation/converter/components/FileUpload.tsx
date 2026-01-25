@@ -37,20 +37,14 @@ export function FileUpload() {
       <h2 className={styles.title}>Upload BPD CSV Files</h2>
       
       {/* Drop Zone */}
-      <div
+      <button
+        type="button"
         className={`${styles.dropZone} ${isDragging ? styles.dragging : ''} ${hasErrors ? styles.error : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        role="button"
-        tabIndex={0}
         aria-label="File drop zone"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleChooseFilesClick();
-          }
-        }}
+        onClick={handleChooseFilesClick}
       >
         <div className={styles.dropZoneContent}>
           <svg
@@ -78,7 +72,7 @@ export function FileUpload() {
             Maximum file size: 10MB per file
           </p>
         </div>
-      </div>
+      </button>
 
       {/* Hidden File Input */}
       <input
@@ -113,8 +107,8 @@ export function FileUpload() {
             ×
           </button>
           <ul className={styles.errorList}>
-            {errors.map((error, index) => (
-              <li key={index} className={styles.errorItem}>
+            {errors.map((error) => (
+              <li key={`${error.name}:${error.message}`} className={styles.errorItem}>
                 {error.message}
               </li>
             ))}
@@ -128,9 +122,9 @@ export function FileUpload() {
           <h3 className={styles.fileListTitle}>
             Uploaded Files ({fileCount})
           </h3>
-          <ul className={styles.fileList} role="list">
+          <ul className={styles.fileList}>
             {files.map((file) => (
-              <li key={file.id} className={styles.fileItem} role="listitem">
+              <li key={file.id} className={styles.fileItem}>
                 <div className={styles.fileInfo}>
                   <span className={styles.fileName} title={file.name}>
                     {file.name}
