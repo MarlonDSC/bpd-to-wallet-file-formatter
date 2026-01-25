@@ -98,7 +98,8 @@
   padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  background-color: #646cff;
+  /* Darkened to meet WCAG contrast with white text */
+  background-color: #535bf2;
   color: white;
   border: none;
   border-radius: 8px;
@@ -108,7 +109,7 @@
 }
 
 .chooseFilesButton:hover {
-  background-color: #535bf2;
+  background-color: #3b44ff;
 }
 
 .chooseFilesButton:focus {
@@ -240,9 +241,9 @@
 .removeButton {
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  background-color: rgba(255, 68, 68, 0.1);
-  color: #ff4444;
-  border: 1px solid #ff4444;
+  background-color: #d32f2f;
+  color: #ffffff;
+  border: 1px solid #d32f2f;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
@@ -251,7 +252,7 @@
 }
 
 .removeButton:hover {
-  background-color: rgba(255, 68, 68, 0.2);
+  background-color: #b71c1c;
 }
 
 .removeButton:focus {
