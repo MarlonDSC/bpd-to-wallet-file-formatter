@@ -121,6 +121,71 @@
   transform: scale(0.98);
 }
 
+/* Convert Button + CSV Status */
+.convertButton {
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: #2e7d32;
+  color: #ffffff;
+  border: 1px solid #2e7d32;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.25s, transform 0.1s;
+  margin-top: 0.75rem;
+}
+
+.convertButton:hover {
+  background-color: #1b5e20;
+}
+
+.convertButton:focus {
+  outline: 2px solid #66bb6a;
+  outline-offset: 2px;
+}
+
+.convertButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.csvStatus {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-color-scheme: light) {
+  .csvStatus {
+    border-color: rgba(0, 0, 0, 0.12);
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.csvStatusSubtext {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+@media (prefers-color-scheme: light) {
+  .csvStatusSubtext {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.csvStatusError {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ff4444;
+  background-color: rgba(255, 68, 68, 0.1);
+  color: inherit;
+}
+
 /* Error Container */
 .errorContainer {
   background-color: rgba(255, 68, 68, 0.1);
