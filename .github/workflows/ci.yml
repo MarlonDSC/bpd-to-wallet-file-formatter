@@ -107,6 +107,60 @@ jobs:
           path: playwright-report/
           retention-days: 7
 
+  bdd:
+    name: BDD Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6.2.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start dev server
+        run: npm run dev &
+        env:
+          CI: true
+
+      - name: Wait for server
+        run: |
+          timeout=120
+          elapsed=0
+          while ! curl -f http://localhost:5173 > /dev/null 2>&1; do
+            if [ $elapsed -ge $timeout ]; then
+              echo "Server failed to start within $timeout seconds"
+              exit 1
+            fi
+            sleep 2
+            elapsed=$((elapsed + 2))
+          done
+          echo "Server is ready"
+
+      - name: Run BDD tests (excluding @manual)
+        run: npm run test:bdd:matrix
+        continue-on-error: true
+
+      - name: Stop dev server
+        if: always()
+        run: pkill -f "vite" || true
+
+      - name: Upload BDD reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bdd-reports
+          path: tests/reports/
+          retention-days: 7
+
   build:
     name: Build Project
     runs-on: ubuntu-latest
