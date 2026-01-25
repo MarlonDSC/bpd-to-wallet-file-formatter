@@ -18,9 +18,7 @@ function sanitizePathSegment(input: string): string {
   return input
     .trim()
     // Keep paths safe on Windows/macOS/Linux
-    // eslint-disable-next-line sonarjs/prefer-string-replace-all
     .replace(/[<>:"/\\|?*]/g, '_') // NOSONAR
-    // eslint-disable-next-line sonarjs/prefer-string-replace-all
     .replace(/\s+/g, '-') // NOSONAR
     .slice(0, 80);
 }
@@ -136,6 +134,7 @@ function sanitizeContextOptionsForBrowser(
   // Playwright limitation: Firefox does not support `isMobile`.
   // We still want to run “mobile-sized” viewports in Firefox, so we strip unsupported flags.
   if (browserName === 'firefox') {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { isMobile, hasTouch, deviceScaleFactor, ...rest } = options as BrowserContextOptions & {
       isMobile?: boolean;
       hasTouch?: boolean;

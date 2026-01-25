@@ -14,9 +14,7 @@ function sanitizePathSegment(input: string): string {
   return input
     .trim()
     // Keep paths safe on Windows/macOS/Linux
-    // eslint-disable-next-line sonarjs/prefer-string-replace-all
     .replace(/[<>:"/\\|?*]/g, '_') // NOSONAR
-    // eslint-disable-next-line sonarjs/prefer-string-replace-all
     .replace(/\s+/g, '-') // NOSONAR
     .slice(0, 80);
 }
