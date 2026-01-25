@@ -1,6 +1,7 @@
 import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
+import { webcrypto } from 'node:crypto';
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
@@ -9,6 +10,12 @@ expect.extend(matchers);
 afterEach(() => {
   cleanup();
 });
+
+// Ensure Web Crypto is available in the test environment (jsdom/node)
+if (!globalThis.crypto) {
+  // @ts-expect-error - Node's webcrypto is compatible with the Web Crypto API we use
+  globalThis.crypto = webcrypto;
+}
 
 // Mock browser APIs if needed
 globalThis.ResizeObserver = vi.fn().mockImplementation(() => ({
