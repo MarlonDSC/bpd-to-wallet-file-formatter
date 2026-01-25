@@ -9,32 +9,18 @@ export interface FileReaderService {
 
 export class BrowserFileReaderService implements FileReaderService {
   async readFile(file: File): Promise<string> {
-    return this.readAsText(file);
+    return await file.text();
   }
 
-  readAsText(file: File, encoding: string = 'UTF-8'): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        const result = event.target?.result;
-        if (typeof result === 'string') {
-          resolve(result);
-        } else {
-          reject(new Error('Failed to read file as text'));
-        }
-      };
-      
-      reader.onerror = () => {
-        reject(new Error('Error reading file'));
-      };
-      
-      reader.readAsText(file, encoding);
-    });
+  async readAsText(file: File, encoding: string = 'UTF-8'): Promise<string> {
+    if (encoding && encoding.toUpperCase() !== 'UTF-8') {
+      throw new Error(`Unsupported encoding: ${encoding}. Only UTF-8 is supported.`);
+    }
+
+    return await file.text();
   }
 
   detectEncoding(): string {
-    // Default to UTF-8, can be enhanced with actual encoding detection
     return 'UTF-8';
   }
 }
