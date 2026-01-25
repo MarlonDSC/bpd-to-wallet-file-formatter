@@ -12,8 +12,9 @@ A React application to convert BPD CSV files to wallet format, built with Domain
 - 📊 Preview and validate transactions
 - 💾 Export to Excel format
 - ✨ Modern, responsive UI
-- 🧪 Comprehensive test coverage
+- 🧪 Comprehensive test coverage (Unit, Integration, E2E, BDD, Visual Regression)
 - 🔍 Static code analysis with SonarCloud
+- 📸 Visual regression testing (Golden tests)
 
 ## Tech Stack
 
@@ -83,6 +84,12 @@ npm run test:integration
 # Run E2E tests
 npm run test:e2e
 
+# Run BDD tests (includes visual regression testing)
+npm run test:bdd
+
+# Update BDD visual snapshots (after intentional UI changes)
+npm run test:bdd:update-snapshots
+
 # Run tests with coverage
 npm run test:coverage
 
@@ -133,6 +140,38 @@ src/
         └── hooks/         # Custom hooks
 ```
 
+## Testing Strategy
+
+This project uses a comprehensive testing strategy:
+
+- **Unit Tests**: Test individual components and functions in isolation
+- **Integration Tests**: Test interactions between components
+- **E2E Tests**: Test complete user workflows with Playwright
+- **BDD Tests**: Behavior-driven tests using Cucumber.js and Gherkin (includes visual regression testing)
+
+### Visual Regression Testing (Golden Tests)
+
+Visual regression testing is integrated into the BDD tests! The BDD scenarios include visual assertions that capture screenshots at key points, combining behavior and visual testing in one place.
+
+**Running BDD Tests (with Visual Regression):**
+```bash
+# Run BDD tests (includes visual regression)
+npm run test:bdd
+
+# To update snapshots: delete snapshot files and re-run tests
+# New baselines will be created automatically
+```
+
+Visual snapshots are automatically captured during BDD test execution and stored in `tests/features/__screenshots__/` (organized by feature/platform/browser/device). This eliminates the need for separate visual regression test files.
+
+**Visual Coverage:**
+- Initial state (empty drop zone)
+- Single file uploaded state
+- Multiple files uploaded state
+- File list item appearance
+- Error states (invalid file type, file too large)
+- State after file removal
+
 ## CI/CD
 
 This project uses GitHub Actions for continuous integration and deployment:
@@ -141,6 +180,9 @@ This project uses GitHub Actions for continuous integration and deployment:
   - Code linting
   - Type checking
   - Unit and integration tests
+  - E2E tests
+  - Visual regression tests
+  - BDD tests (excluding @manual)
   - E2E tests
   - Build validation
 
