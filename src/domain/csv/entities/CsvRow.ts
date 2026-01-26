@@ -26,10 +26,10 @@ export class CsvRow {
    * Matching is case-insensitive and accent-insensitive.
    */
   isHeaderRow(requiredColumns: readonly string[]): boolean {
-    const normalizedCells = this.data.map(CsvRow.normalizeHeaderToken);
+    const normalizedCells = new Set(this.data.map(CsvRow.normalizeHeaderToken));
     return requiredColumns
       .map(CsvRow.normalizeHeaderToken)
-      .every((required) => normalizedCells.includes(required));
+      .every((required) => normalizedCells.has(required));
   }
 
   private static normalizeHeaderToken(value: string): string {
@@ -37,7 +37,7 @@ export class CsvRow {
       .trim()
       .toLowerCase()
       .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '');
+      .replaceAll(/\p{Diacritic}/gu, '');
   }
 }
 
