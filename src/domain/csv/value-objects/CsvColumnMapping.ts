@@ -41,9 +41,9 @@ export class CsvColumnMapping {
     // Prefer accented labels, but accept common variants too.
     const fechaPosteoIndex = idx('Fecha Posteo');
     const descripcionIndex =
-      idx('Descripción') !== -1 ? idx('Descripción') : idx('Descripcion');
+      idx('Descripción') === -1 ? idx('Descripcion') : idx('Descripción');
     const montoTransaccionIndex =
-      idx('Monto Transacción') !== -1
+      idx('Monto Transacción') === -1
         ? idx('Monto Transacción')
         : idx('Monto Transaccion');
 
@@ -77,7 +77,7 @@ export class CsvColumnMapping {
       .trim()
       .toLowerCase()
       .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '');
+      .replaceAll(/\p{Diacritic}/gu, '');
   }
 }
 
