@@ -34,7 +34,7 @@ export class CsvColumnMapping {
   static fromHeaderRow(headerCells: readonly string[]): CsvColumnMapping {
     const idx = (label: string): number => {
       const normalized = CsvColumnMapping.normalizeHeaderToken(label);
-      const candidates = headerCells.map(CsvColumnMapping.normalizeHeaderToken);
+      const candidates = headerCells.map((element) => CsvColumnMapping.normalizeHeaderToken(element));
       return candidates.indexOf(normalized);
     };
 
