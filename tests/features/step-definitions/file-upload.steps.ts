@@ -594,9 +594,11 @@ Then('no transaction data is extracted', async () => {
   await expect(stepContext.page.locator(String.raw`text=/Extracted \d+ transaction rows/`)).not.toBeVisible();
 });
 
-Then('header rows lines {int}-{int} are skipped', async (_from: number, _to: number) => {
+Then('header rows lines {int}-{int} are skipped', async (from: number, to: number) => {
   // Indirect assertion: our fixtures include 10 metadata rows before the header.
   // If parsing completes successfully and rows are extracted, metadata rows were skipped.
+  void from;
+  void to;
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator('text=Parsing complete.')).toBeVisible({
     timeout: 5000,
