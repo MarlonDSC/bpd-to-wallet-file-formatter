@@ -40,13 +40,22 @@ export class BrowserCsvParserService implements CsvParserService {
     });
 
     if (parsed.errors && parsed.errors.length > 0) {
-      // Treat file-level parsing errors as fatal.
-      const first = parsed.errors[0];
-      throw new InvalidCsvFormatError(
-        first?.message
-          ? `Invalid CSV format. Unable to parse file. ${first.message}`
-          : 'Invalid CSV format. Unable to parse file.'
+      // PapaParse can emit non-fatal "errors" like UndetectableDelimiter.
+      // We treat only real parsing issues as fatal.
+      const fatalErrors = parsed.errors.filter(
+        (e) =>
+          e.code !== 'UndetectableDelimiter' &&
+          e.type !== 'Delimiter'
       );
+
+      if (fatalErrors.length > 0) {
+        const first = fatalErrors[0];
+        throw new InvalidCsvFormatError(
+          first?.message
+            ? `Invalid CSV format. Unable to parse file. ${first.message}`
+            : 'Invalid CSV format. Unable to parse file.'
+        );
+      }
     }
 
     const rows = (parsed.data ?? []).map((row) =>
