@@ -470,17 +470,6 @@ Given('a BPD CSV file with empty rows between transactions', async () => {
   stepContext.fileContent = content;
 });
 
-Given(
-  'a CSV file missing required columns (Fecha Posteo, Descripción, Monto Transacción)',
-  async () => {
-    const content = createBpdCsvMissingColumnsContent();
-    const testFilePath = createTestFile('bpd-missing-columns.csv', content, 'utf-8');
-    stepContext.testFilePath = testFilePath;
-    stepContext.fileName = 'bpd-missing-columns.csv';
-    stepContext.fileContent = content;
-  }
-);
-
 Given('a CSV file missing required columns', async () => {
   const content = createBpdCsvMissingColumnsContent();
   const testFilePath = createTestFile('bpd-missing-columns.csv', content, 'utf-8');
