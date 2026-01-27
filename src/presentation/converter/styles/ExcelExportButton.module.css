@@ -5,6 +5,18 @@
   gap: 0.75rem;
 }
 
+.filterSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filterLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+}
+
 .exportButton {
   display: inline-flex;
   align-items: center;

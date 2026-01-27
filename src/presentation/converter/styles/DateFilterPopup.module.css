@@ -1,0 +1,259 @@
+.popupOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 1rem;
+}
+
+.popup {
+  background-color: var(--color-background, #ffffff);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 100%;
+  max-width: 500px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.popupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
+}
+
+.popupTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text, #111827);
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  color: var(--color-text-secondary, #6b7280);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: var(--color-background-hover, #f3f4f6);
+  color: var(--color-text, #111827);
+}
+
+.popupContent {
+  padding: 1.25rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--color-border-light, #f3f4f6);
+}
+
+.section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 1rem;
+}
+
+.radioLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  flex: 1;
+}
+
+.radioInput {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  accent-color: var(--color-primary, #2563eb);
+}
+
+.radioText {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+}
+
+.count {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.checklist {
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  transition: background-color 0.15s;
+}
+
+.checkboxLabel:hover:not(.checkboxLabelDisabled) {
+  background-color: var(--color-background-hover, #f3f4f6);
+}
+
+.checkboxLabelDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.checkboxInput {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+  accent-color: var(--color-primary, #2563eb);
+}
+
+.checkboxLabelDisabled .checkboxInput {
+  cursor: not-allowed;
+}
+
+.checkboxText {
+  font-size: 0.9375rem;
+  color: var(--color-text, #111827);
+}
+
+.popupFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  border-top: 1px solid var(--color-border, #e5e7eb);
+}
+
+.cancelButton {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text, #111827);
+  background-color: transparent;
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.cancelButton:hover {
+  background-color: var(--color-background-hover, #f9fafb);
+  border-color: var(--color-border-hover, #9ca3af);
+}
+
+.applyButton {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #ffffff;
+  background-color: var(--color-primary, #2563eb);
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.applyButton:hover:not(:disabled) {
+  background-color: var(--color-primary-hover, #1d4ed8);
+}
+
+.applyButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (prefers-color-scheme: dark) {
+  .popup {
+    background-color: var(--color-background-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .popupHeader {
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .popupTitle {
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .closeButton {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+
+  .closeButton:hover {
+    background-color: var(--color-background-hover-dark, #374151);
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .section {
+    border-color: var(--color-border-light-dark, #374151);
+  }
+
+  .radioText {
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .count {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+
+  .checklist {
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .checkboxLabel:hover:not(.checkboxLabelDisabled) {
+    background-color: var(--color-background-hover-dark, #374151);
+  }
+
+  .checkboxText {
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .popupFooter {
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .cancelButton {
+    color: var(--color-text-dark, #f9fafb);
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .cancelButton:hover {
+    background-color: var(--color-background-hover-dark, #374151);
+    border-color: var(--color-border-hover-dark, #4b5563);
+  }
+}
