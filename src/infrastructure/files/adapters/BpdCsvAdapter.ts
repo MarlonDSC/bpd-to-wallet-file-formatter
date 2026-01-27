@@ -95,9 +95,22 @@ export class BpdCsvAdapter {
         continue;
       }
 
+      // Negate amounts for the second section (debits/negative transactions)
+      // First section (headerSections === 1) contains credits (positive)
+      // Second section (headerSections === 2) contains debits (negative)
+      let montoTransaccion = mapped.montoTransaccion;
+      if (headerSections === 2) {
+        const amount = Number.parseFloat(montoTransaccion);
+        if (!Number.isNaN(amount)) {
+          montoTransaccion = (-amount).toString();
+        }
+      }
+
       extracted.push({
         rowNumber: row.rowNumber,
-        ...mapped,
+        fechaPosteo: mapped.fechaPosteo,
+        descripcion: mapped.descripcion,
+        montoTransaccion,
         rawData: [...row.data],
       });
     }
