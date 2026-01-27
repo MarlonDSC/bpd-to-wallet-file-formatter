@@ -417,8 +417,21 @@ Then('the drop zone shows an error state', async () => {
 
 Then('an error message is displayed', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  const errorContainer = stepContext.page.locator('[role="alert"]');
-  await expect(errorContainer).toBeVisible({ timeout: 2000 });
+  
+  // Check for error messages - could be in Excel export area or general error area
+  const excelError = stepContext.page.locator('[role="alert"]').filter({
+    hasText: /error|failed/i,
+  });
+  const generalError = stepContext.page.locator('[role="alert"]');
+  
+  // Try Excel-specific error first (with longer timeout for async operations)
+  const excelErrorVisible = await excelError.isVisible().catch(() => false);
+  if (excelErrorVisible) {
+    await expect(excelError).toBeVisible({ timeout: 5000 });
+  } else {
+    // Fallback to general error check
+    await expect(generalError).toBeVisible({ timeout: 5000 });
+  }
   
   // Visual regression: Capture generic error state
   const fileUploadSection = stepContext.page.locator('[aria-label="File drop zone"]').locator('..');
@@ -496,6 +509,18 @@ Given('a BPD CSV file with some invalid transaction rows', async () => {
 
 When('the user clicks {string} button', async (buttonText: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
+  
+  // Special handling for Download Excel button to set up download listener
+  if (buttonText === 'Download Excel') {
+    const downloadPromise = stepContext.page.waitForEvent('download', { timeout: 30000 });
+    const button = stepContext.page.getByRole('button', { name: /download excel/i });
+    await expect(button).toBeEnabled({ timeout: 10000 });
+    await button.click();
+    stepContext.downloadPromise = downloadPromise;
+    return;
+  }
+  
+  // General button click handling
   const button = stepContext.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
   await expect(button).toBeEnabled({ timeout: 10000 });
   await button.click();
