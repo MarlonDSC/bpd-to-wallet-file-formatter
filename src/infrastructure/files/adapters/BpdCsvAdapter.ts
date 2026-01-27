@@ -39,104 +39,161 @@ export class BpdCsvAdapter {
   private readonly requiredColumns = CsvColumnMapping.requiredColumns();
 
   adapt(rawRows: string[][]): AdaptedBpdCsv {
-    // Treat PapaParse row index as 1-based rowNumber for user-facing output.
-    const rows = rawRows.map((cells, idx) => new CsvRow(idx + 1, cells));
-
-    let currentStructure: BpdCsvStructure | null = null;
-    let headerSections = 0;
-    const headerRowNumbers: number[] = [];
-
-    let skippedEmptyRows = 0;
-    let skippedInvalidRows = 0;
-
-    const extracted: AdaptedBpdCsv['rows'] = [];
+    const rows = this.createCsvRows(rawRows);
+    const state = this.initializeProcessingState();
 
     for (const row of rows) {
       if (row.isEmpty()) {
-        skippedEmptyRows += 1;
+        state.skippedEmptyRows += 1;
         continue;
       }
 
-      // Detect header rows anywhere (supports multiple sections).
       if (row.isHeaderRow(this.requiredColumns)) {
-        const mapping = CsvColumnMapping.fromHeaderRow(row.data);
-        currentStructure = new BpdCsvStructure({
-          headerRowIndex: row.rowNumber,
-          columnMapping: mapping,
-        });
-        currentStructure.validateStructure();
-
-        headerSections += 1;
-        headerRowNumbers.push(row.rowNumber);
+        this.processHeaderRow(row, state);
         continue;
       }
 
-      // Before the first header is found, treat rows as metadata and skip.
-      if (!currentStructure) continue;
-
-      const mapped = currentStructure.columnMapping.mapRow(row);
-
-      // Required values must exist; otherwise skip but count warning.
-      if (
-        mapped.fechaPosteo === '' &&
-        mapped.descripcion === '' &&
-        mapped.montoTransaccion === ''
-      ) {
-        skippedInvalidRows += 1;
+      if (!state.currentStructure) {
+        // Before the first header is found, treat rows as metadata and skip.
         continue;
       }
 
-      if (
-        mapped.fechaPosteo === '' ||
-        mapped.descripcion === '' ||
-        mapped.montoTransaccion === ''
-      ) {
-        skippedInvalidRows += 1;
-        continue;
+      const transactionRow = this.tryExtractTransactionRow(row, state);
+      if (transactionRow) {
+        state.extracted.push(transactionRow);
       }
-
-      // Negate amounts for the second section (debits/negative transactions)
-      // First section (headerSections === 1) contains credits (positive)
-      // Second section (headerSections === 2) contains debits (negative)
-      let montoTransaccion = mapped.montoTransaccion;
-      if (headerSections === 2) {
-        const amount = Number.parseFloat(montoTransaccion);
-        if (!Number.isNaN(amount)) {
-          montoTransaccion = (-amount).toString();
-        }
-      }
-
-      extracted.push({
-        rowNumber: row.rowNumber,
-        fechaPosteo: mapped.fechaPosteo,
-        descripcion: mapped.descripcion,
-        montoTransaccion,
-        rawData: [...row.data],
-      });
     }
 
-    if (headerSections === 0) {
-      // If no header row is detected at all, treat this as missing columns.
+    this.validateFinalState(state);
+    return this.buildResult(state);
+  }
+
+  private createCsvRows(rawRows: string[][]): CsvRow[] {
+    // Treat PapaParse row index as 1-based rowNumber for user-facing output.
+    return rawRows.map((cells, idx) => new CsvRow(idx + 1, cells));
+  }
+
+  private initializeProcessingState() {
+    return {
+      currentStructure: null as BpdCsvStructure | null,
+      headerSections: 0,
+      headerRowNumbers: [] as number[],
+      skippedEmptyRows: 0,
+      skippedInvalidRows: 0,
+      extracted: [] as AdaptedBpdCsv['rows'],
+    };
+  }
+
+  private processHeaderRow(
+    row: CsvRow,
+    state: ReturnType<typeof this.initializeProcessingState>
+  ): void {
+    const mapping = CsvColumnMapping.fromHeaderRow(row.data);
+    state.currentStructure = new BpdCsvStructure({
+      headerRowIndex: row.rowNumber,
+      columnMapping: mapping,
+    });
+    state.currentStructure.validateStructure();
+
+    state.headerSections += 1;
+    state.headerRowNumbers.push(row.rowNumber);
+  }
+
+  private tryExtractTransactionRow(
+    row: CsvRow,
+    state: ReturnType<typeof this.initializeProcessingState>
+  ): AdaptedBpdCsv['rows'][number] | null {
+    const mapped = state.currentStructure!.columnMapping.mapRow(row);
+
+    if (!this.isValidTransactionRow(mapped)) {
+      state.skippedInvalidRows += 1;
+      return null;
+    }
+
+    const montoTransaccion = this.adjustAmountForSection(
+      mapped.montoTransaccion,
+      state.headerSections
+    );
+
+    return {
+      rowNumber: row.rowNumber,
+      fechaPosteo: mapped.fechaPosteo,
+      descripcion: mapped.descripcion,
+      montoTransaccion,
+      rawData: [...row.data],
+    };
+  }
+
+  private isValidTransactionRow(mapped: {
+    fechaPosteo: string;
+    descripcion: string;
+    montoTransaccion: string;
+  }): boolean {
+    // Check if all fields are empty (completely empty row)
+    const allEmpty =
+      mapped.fechaPosteo === '' &&
+      mapped.descripcion === '' &&
+      mapped.montoTransaccion === '';
+
+    if (allEmpty) {
+      return false;
+    }
+
+    // Check if any required field is missing
+    return (
+      mapped.fechaPosteo !== '' &&
+      mapped.descripcion !== '' &&
+      mapped.montoTransaccion !== ''
+    );
+  }
+
+  private adjustAmountForSection(
+    amountString: string,
+    headerSections: number
+  ): string {
+    // First section (headerSections === 1) contains credits (positive)
+    // Second section (headerSections === 2) contains debits (negative)
+    if (headerSections !== 2) {
+      return amountString;
+    }
+
+    const amount = Number.parseFloat(amountString);
+    if (Number.isNaN(amount)) {
+      return amountString;
+    }
+
+    return (-amount).toString();
+  }
+
+  private validateFinalState(
+    state: ReturnType<typeof this.initializeProcessingState>
+  ): void {
+    if (state.headerSections === 0) {
       throw new MissingColumnError(this.requiredColumns);
     }
 
-    const mapping = currentStructure?.columnMapping;
-    if (!mapping) {
+    if (!state.currentStructure?.columnMapping) {
       throw new ParseError('Unable to determine column mapping from CSV headers.');
     }
+  }
+
+  private buildResult(
+    state: ReturnType<typeof this.initializeProcessingState>
+  ): AdaptedBpdCsv {
+    const mapping = state.currentStructure!.columnMapping;
 
     return {
-      rows: extracted,
+      rows: state.extracted,
       columnMapping: {
         fechaPosteoIndex: mapping.fechaPosteoIndex,
         descripcionIndex: mapping.descripcionIndex,
         montoTransaccionIndex: mapping.montoTransaccionIndex,
       },
       metadata: {
-        headerSections,
-        headerRowNumbers,
-        skippedEmptyRows,
-        skippedInvalidRows,
+        headerSections: state.headerSections,
+        headerRowNumbers: state.headerRowNumbers,
+        skippedEmptyRows: state.skippedEmptyRows,
+        skippedInvalidRows: state.skippedInvalidRows,
       },
     };
   }
