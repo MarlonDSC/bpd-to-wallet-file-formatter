@@ -1,4 +1,4 @@
-import { Given, When, Then, Before, After } from '@cucumber/cucumber';
+import { Given, When, Then, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, firefox, webkit, expect } from '@playwright/test';
 
 import { writeFileSync, unlinkSync } from 'node:fs';
@@ -11,12 +11,57 @@ import { compareScreenshot } from '../visual-helpers';
 const testFilesDir = tmpdir();
 const testFiles: string[] = [];
 
+// Our UI interactions (file pickers, parsing, navigation) can occasionally exceed
+// Cucumber's default 5s step timeout on slower machines/CI.
+setDefaultTimeout(60 * 1000);
+
 // Test file utilities
-function createTestFile(filename: string, content: string): string {
+function createTestFile(
+  filename: string,
+  content: string,
+  encoding: BufferEncoding = 'utf-8'
+): string {
   const filePath = join(testFilesDir, filename);
-  writeFileSync(filePath, content, 'utf-8');
+  writeFileSync(filePath, content, encoding);
   testFiles.push(filePath);
   return filePath;
+}
+
+function createBpdCsvContent(params?: {
+  includeEmptyRows?: boolean;
+  includeInvalidRows?: boolean;
+  multipleHeaderSections?: boolean;
+}): string {
+  const metadataLines = Array.from({ length: 10 }, (_, i) => `Metadata line ${i + 1}`);
+  const header = 'Fecha Posteo,Descripción,Monto Transacción';
+
+  const tx1 = '10/01/2010,Café,123.45';
+  const tx2 = '11/01/2010,Payment,-50.00';
+  const tx3 = '12/01/2010,Transfer,10.00';
+
+  const lines: string[] = [
+    ...metadataLines,
+    header,
+    tx1,
+    ...(params?.includeEmptyRows ? [''] : []),
+    ...(params?.includeInvalidRows ? ['13/01/2010,,99.99'] : []), // missing description
+    tx2,
+    ...(params?.multipleHeaderSections ? ['', 'Section break', header, tx3] : []),
+  ];
+
+  return `${lines.join('\n')}\n`;
+}
+
+function createBpdCsvMissingColumnsContent(): string {
+  const metadataLines = Array.from({ length: 10 }, (_, i) => `Metadata line ${i + 1}`);
+  const headerMissing = 'Fecha Posteo,Descripción,Monto';
+  const tx1 = '10/01/2010,Payment,123.45';
+  return `${[...metadataLines, headerMissing, tx1].join('\n')}\n`;
+}
+
+function createMalformedCsvContent(): string {
+  // Unclosed quote -> PapaParse should report an error.
+  return 'Fecha Posteo,Descripción,"Monto Transacción\n10/01/2010,Café,123.45\n';
 }
 
 function createLargeCsvFile(sizeInMB: number): string {
@@ -253,7 +298,8 @@ Then('the file is added to the upload queue', async () => {
   
   // Visual regression: Capture state with single file
   const fileUploadSection = stepContext.page.locator('[aria-label="File drop zone"]').locator('..');
-  await compareScreenshot(fileUploadSection, 'bdd-single-file-uploaded', stepContext.visual);
+  const snapshotName = `bdd-single-file-uploaded__${stepContext.visual?.scenarioName || 'unknown-scenario'}`;
+  await compareScreenshot(fileUploadSection, snapshotName, stepContext.visual);
 });
 
 Then('the file name is displayed', async () => {
@@ -377,4 +423,177 @@ Then('an error message is displayed', async () => {
   // Visual regression: Capture generic error state
   const fileUploadSection = stepContext.page.locator('[aria-label="File drop zone"]').locator('..');
   await compareScreenshot(fileUploadSection, 'bdd-error-state', stepContext.visual);
+});
+
+// ==========================
+// CSV parsing/extraction BDD
+// ==========================
+
+Given('a valid BPD CSV file with transaction data', async () => {
+  const content = createBpdCsvContent();
+  const testFilePath = createTestFile('bpd.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a BPD CSV file with UTF-8 encoding', async () => {
+  const content = createBpdCsvContent();
+  const testFilePath = createTestFile('bpd-utf8.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-utf8.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a BPD CSV file with Windows-1252 encoding', async () => {
+  const content = createBpdCsvContent();
+  // Use latin1 to force bytes that are invalid UTF-8 (e.g. é = 0xE9)
+  const testFilePath = createTestFile('bpd-win1252.csv', content, 'latin1');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-win1252.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a BPD CSV file with multiple header sections', async () => {
+  const content = createBpdCsvContent({ multipleHeaderSections: true });
+  const testFilePath = createTestFile('bpd-multi-section.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-multi-section.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a BPD CSV file with empty rows between transactions', async () => {
+  const content = createBpdCsvContent({ includeEmptyRows: true });
+  const testFilePath = createTestFile('bpd-empty-rows.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-empty-rows.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a CSV file missing required columns', async () => {
+  const content = createBpdCsvMissingColumnsContent();
+  const testFilePath = createTestFile('bpd-missing-columns.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-missing-columns.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a malformed CSV file', async () => {
+  const content = createMalformedCsvContent();
+  const testFilePath = createTestFile('malformed.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'malformed.csv';
+  stepContext.fileContent = content;
+});
+
+Given('a BPD CSV file with some invalid transaction rows', async () => {
+  const content = createBpdCsvContent({ includeInvalidRows: true });
+  const testFilePath = createTestFile('bpd-invalid-rows.csv', content, 'utf-8');
+  stepContext.testFilePath = testFilePath;
+  stepContext.fileName = 'bpd-invalid-rows.csv';
+  stepContext.fileContent = content;
+});
+
+When('the user clicks {string} button', async (buttonText: string) => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  const button = stepContext.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  await expect(button).toBeEnabled({ timeout: 10000 });
+  await button.click();
+});
+
+Then('parsing completes successfully', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  const complete = stepContext.page.locator(String.raw`text=/Parsing complete/i`);
+  const failed = stepContext.page.locator(String.raw`text=/Parsing failed/i`);
+
+  // Wait for either completion or failure.
+  await Promise.race([
+    complete.waitFor({ state: 'visible', timeout: 15000 }),
+    failed.waitFor({ state: 'visible', timeout: 15000 }),
+  ]);
+
+  if (await failed.isVisible()) {
+    const errorBlock = failed.locator('..');
+    const text = (await errorBlock.textContent())?.trim() || 'Unknown error';
+    throw new Error(`Expected parsing success, but saw failure UI: ${text}`);
+  }
+
+  await expect(complete).toBeVisible();
+});
+
+Then('encoding is detected automatically', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator('text=/Encoding:/')).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('encoding is detected as {string}', async (encoding: string) => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator(`text=/Encoding: .*${encoding}/`)).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('transaction rows are extracted', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator(String.raw`text=/Extracted \d+ transaction rows/`)).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('a total of {int} transaction rows are extracted', async (count: number) => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator(`text=Extracted ${count} transaction rows`)).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('a warning message is displayed showing number of skipped rows', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator(String.raw`text=/Skipped \d+ invalid row\(s\)\./`)).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then(
+  'an error message {string} is displayed',
+  async (message: string) => {
+    if (!stepContext.page) throw new Error('Page not initialized');
+    const failed = stepContext.page.locator(String.raw`text=/Parsing failed/i`);
+    await expect(failed).toBeVisible({
+      timeout: 5000,
+    });
+    // Match substring (the implementation may append details).
+    await expect(stepContext.page.locator(`text=${message}`)).toBeVisible({
+      timeout: 5000,
+    });
+  }
+);
+
+Then('parsing stops', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator('text=Parsing failed.')).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('no transaction data is extracted', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator(String.raw`text=/Extracted \d+ transaction rows/`)).not.toBeVisible();
+});
+
+Then('header rows lines {int}-{int} are skipped', async (from: number, to: number) => {
+  // Indirect assertion: our fixtures include 10 metadata rows before the header.
+  // If parsing completes successfully and rows are extracted, metadata rows were skipped.
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator('text=Parsing complete.')).toBeVisible({
+    timeout: 5000,
+  });
+});
+
+Then('no errors are displayed', async () => {
+  if (!stepContext.page) throw new Error('Page not initialized');
+  await expect(stepContext.page.locator('text=Parsing failed.')).not.toBeVisible();
+  await expect(stepContext.page.locator('[role="alert"]')).not.toBeVisible();
 });

@@ -4,6 +4,8 @@
 
 import { useRef } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
+import { useCsvParser } from '../hooks/useCsvParser';
+import { CsvParsingStatus } from './CsvParsingStatus';
 import styles from '../styles/FileUpload.module.css';
 
 export function FileUpload() {
@@ -21,6 +23,9 @@ export function FileUpload() {
     removeFile,
     clearErrors,
   } = useFileUpload();
+
+  const { isParsing, error: csvError, warningCount, results, parseFiles } =
+    useCsvParser();
 
   const handleChooseFilesClick = () => {
     fileInputRef.current?.click();
@@ -144,6 +149,23 @@ export function FileUpload() {
               </li>
             ))}
           </ul>
+
+          <button
+            type="button"
+            className={styles.convertButton}
+            onClick={() => parseFiles(files)}
+            disabled={isParsing || hasErrors || fileCount === 0}
+            aria-label="Convert and parse CSV files"
+          >
+            {isParsing ? 'Parsing…' : 'Convert'}
+          </button>
+
+          <CsvParsingStatus
+            isParsing={isParsing}
+            error={csvError}
+            warningCount={warningCount}
+            results={results}
+          />
         </div>
       )}
     </div>
