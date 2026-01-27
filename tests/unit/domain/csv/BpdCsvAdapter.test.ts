@@ -21,12 +21,12 @@ describe('BpdCsvAdapter', () => {
       ['Banco Popular Dominicano'],
       ['Cuenta: 123'],
       [''],
-      // section 1
+      // section 1 (credits - positive amounts)
       ['Fecha Posteo', 'Descripción', 'Monto Transacción'],
       ['10/01/2010', 'Café', '123.45'],
-      ['11/01/2010', 'Payment', '-50.00'],
+      ['11/01/2010', 'Payment', '50.00'],
       [''],
-      // section 2
+      // section 2 (debits - should be negated)
       ['Fecha Posteo', 'Descripción', 'Monto Transacción'],
       ['12/01/2010', 'Transfer', '10.00'],
     ];
@@ -37,6 +37,11 @@ describe('BpdCsvAdapter', () => {
     expect(res.rows).toHaveLength(3);
     expect(res.rows.map((r) => r.rowNumber)).toEqual([5, 6, 9]);
     expect(res.rows[0].descripcion).toBe('Café');
+    // First section: amounts should remain positive
+    expect(res.rows[0].montoTransaccion).toBe('123.45');
+    expect(res.rows[1].montoTransaccion).toBe('50.00');
+    // Second section: amounts should be negated
+    expect(res.rows[2].montoTransaccion).toBe('-10');
   });
 
   it('should skip empty and invalid rows and count them as warnings', () => {
