@@ -2,10 +2,12 @@
  * FileUpload - Component for file upload with drag-and-drop support
  */
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useCsvParser } from '../hooks/useCsvParser';
+import { useTransactionTransformer } from '../hooks/useTransactionTransformer';
 import { CsvParsingStatus } from './CsvParsingStatus';
+import { TransformationStatus } from './TransformationStatus';
 import styles from '../styles/FileUpload.module.css';
 
 export function FileUpload() {
@@ -27,6 +29,22 @@ export function FileUpload() {
   const { isParsing, error: csvError, warningCount, results, parseFiles } =
     useCsvParser();
 
+  const {
+    isTransforming,
+    error: transformError,
+    transactions,
+    errors: transformErrors,
+    skippedCount,
+    transformResults,
+  } = useTransactionTransformer();
+
+  // Automatically trigger transformation when parsing completes successfully
+  useEffect(() => {
+    if (results && results.length > 0 && !isParsing && !csvError) {
+      transformResults(results);
+    }
+  }, [results, isParsing, csvError, transformResults]);
+
   const handleChooseFilesClick = () => {
     fileInputRef.current?.click();
   };
@@ -35,6 +53,12 @@ export function FileUpload() {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
     return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+
+  const getConvertButtonText = (): string => {
+    if (isParsing) return 'Parsing…';
+    if (isTransforming) return 'Transforming…';
+    return 'Convert';
   };
 
   return (
@@ -154,10 +178,10 @@ export function FileUpload() {
             type="button"
             className={styles.convertButton}
             onClick={() => parseFiles(files)}
-            disabled={isParsing || hasErrors || fileCount === 0}
+            disabled={isParsing || isTransforming || hasErrors || fileCount === 0}
             aria-label="Convert and parse CSV files"
           >
-            {isParsing ? 'Parsing…' : 'Convert'}
+            {getConvertButtonText()}
           </button>
 
           <CsvParsingStatus
@@ -166,6 +190,16 @@ export function FileUpload() {
             warningCount={warningCount}
             results={results}
           />
+
+          {results && results.length > 0 && (
+            <TransformationStatus
+              isTransforming={isTransforming}
+              error={transformError}
+              transactions={transactions}
+              errors={transformErrors}
+              skippedCount={skippedCount}
+            />
+          )}
         </div>
       )}
     </div>
