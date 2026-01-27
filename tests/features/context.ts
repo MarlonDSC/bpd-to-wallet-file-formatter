@@ -25,6 +25,11 @@ export interface StepContext {
   uploadedFileName?: string;
   fileChooserPromise?: Promise<{ setFiles: (files: string | string[]) => Promise<void> }>;
   dropZone?: { dispatchEvent: (event: string) => Promise<void> };
+  downloadPromise?: Promise<import('@playwright/test').Download>;
+  downloadedFilePath?: string;
+  downloadedFileName?: string;
+  expectedDateRange?: { minDate: string; maxDate: string };
+  expectExcelError?: boolean;
 }
 
 // Global context object shared across all steps
