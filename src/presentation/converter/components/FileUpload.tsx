@@ -2,12 +2,15 @@
  * FileUpload - Component for file upload with drag-and-drop support
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useMemo } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useCsvParser } from '../hooks/useCsvParser';
 import { useTransactionTransformer } from '../hooks/useTransactionTransformer';
 import { CsvParsingStatus } from './CsvParsingStatus';
 import { TransformationStatus } from './TransformationStatus';
+import { DataPreview } from './DataPreview';
+import { ExcelExportButton } from './ExcelExportButton';
+import { ExcelMapper } from '../../../application/excel/mappers/ExcelMapper';
 import styles from '../styles/FileUpload.module.css';
 
 export function FileUpload() {
@@ -60,6 +63,20 @@ export function FileUpload() {
     if (isTransforming) return 'Transforming…';
     return 'Convert';
   };
+
+  // Prepare preview data when transactions are available
+  const previewData = useMemo(() => {
+    if (transactions.length === 0) {
+      return null;
+    }
+
+    try {
+      const workbook = ExcelMapper.toDomain(transactions);
+      return ExcelMapper.toViewModel(workbook);
+    } catch {
+      return null;
+    }
+  }, [transactions]);
 
   return (
     <div className={styles.fileUploadContainer}>
@@ -200,6 +217,23 @@ export function FileUpload() {
               skippedCount={skippedCount}
             />
           )}
+
+          {/* Data Preview and Excel Export */}
+          {!isTransforming &&
+            !transformError &&
+            transactions.length > 0 &&
+            previewData && (
+              <>
+                <DataPreview
+                  headers={previewData.headers}
+                  rows={previewData.rows}
+                />
+                <ExcelExportButton
+                  transactions={transactions}
+                  disabled={isParsing || isTransforming}
+                />
+              </>
+            )}
         </div>
       )}
     </div>
