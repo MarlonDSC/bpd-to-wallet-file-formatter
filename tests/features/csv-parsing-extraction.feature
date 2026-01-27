@@ -61,7 +61,7 @@ Feature: CSV Parsing and Data Extraction
         When the user attempts to upload the file
         Then the file is added to the upload queue
         When the user clicks "Convert" button
-        Then an error message "CSV file is missing required columns. Expected: Fecha Posteo, Descripción, Monto Transacción" is displayed
+        Then a CSV parsing error message "CSV file is missing required columns. Expected: Fecha Posteo, Descripción, Monto Transacción" is displayed
         And parsing stops
         And no transaction data is extracted
 
@@ -71,7 +71,7 @@ Feature: CSV Parsing and Data Extraction
         When the user attempts to upload the file
         Then the file is added to the upload queue
         When the user clicks "Convert" button
-        Then an error message "Invalid CSV format. Unable to parse file." is displayed
+        Then a CSV parsing error message "Invalid CSV format. Unable to parse file." is displayed
         And parsing stops
         And no transaction data is extracted
 
