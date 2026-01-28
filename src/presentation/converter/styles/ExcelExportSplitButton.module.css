@@ -1,0 +1,304 @@
+.splitButtonContainer {
+  margin-top: 1.5rem;
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.splitButtonGroup {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.viewTableButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem 0 0 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.viewTableButton:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.viewTableButton:active:not(:disabled) {
+  background-color: #1e40af;
+}
+
+.viewTableButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.viewTableButton svg {
+  flex-shrink: 0;
+}
+
+.downloadButton {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  background-color: #2563eb;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.downloadButtonRoundedLeft {
+  border-radius: 0.5rem 0 0 0.5rem;
+}
+
+.downloadButton:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.downloadButton:active:not(:disabled) {
+  background-color: #1e40af;
+}
+
+.downloadButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.splitDivider {
+  width: 1px;
+  background-color: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.downloadButton:disabled ~ .splitDivider {
+  opacity: 0.3;
+}
+
+.dropdownToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.875rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 0 0.5rem 0.5rem 0;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.dropdownToggle:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.dropdownToggle:active:not(:disabled) {
+  background-color: #1e40af;
+}
+
+.dropdownToggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dropdownToggle[aria-expanded='true'] {
+  background-color: #1d4ed8;
+}
+
+.chevronIcon {
+  transition: transform 0.2s;
+}
+
+.dropdownToggle[aria-expanded='true'] .chevronIcon {
+  transform: rotate(180deg);
+}
+
+.downloadIcon {
+  flex-shrink: 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: visible;
+  min-width: 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dropdownMenu {
+    background-color: var(--color-background-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+}
+
+.menuItem {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+  gap: 0.5rem;
+  position: relative;
+  overflow: visible;
+}
+
+@media (prefers-color-scheme: dark) {
+  .menuItem {
+    color: var(--color-text-dark, #f9fafb);
+  }
+}
+
+.menuItem > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuItem:hover:not(:disabled) {
+  background-color: var(--color-background-hover, #f3f4f6);
+}
+
+@media (prefers-color-scheme: dark) {
+  .menuItem:hover:not(:disabled) {
+    background-color: var(--color-background-hover-dark, #374151);
+  }
+}
+
+.menuItem:focus {
+  outline: none;
+  background-color: var(--color-background-hover, #f3f4f6);
+}
+
+@media (prefers-color-scheme: dark) {
+  .menuItem:focus {
+    background-color: var(--color-background-hover-dark, #374151);
+  }
+}
+
+.menuItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menuItemSelected {
+  background-color: var(--color-primary-light, #dbeafe);
+  color: var(--color-primary, #3b82f6);
+  font-weight: 500;
+}
+
+@media (prefers-color-scheme: dark) {
+  .menuItemSelected {
+    background-color: var(--color-primary-dark, #1e3a8a);
+    color: var(--color-primary-light, #93c5fd);
+  }
+}
+
+.menuItemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  background-color: var(--color-primary, #2563eb);
+  color: #ffffff;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+.errorMessage {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #7f1d1d;
+  border: 1px solid #dc2626;
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  font-size: 0.875rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .errorMessage {
+    background-color: #fee2e2;
+    border-color: #fecaca;
+    color: #7f1d1d;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .splitButtonGroup {
+    flex-direction: column;
+  }
+
+  .downloadButton {
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  .splitDivider {
+    width: 100%;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .dropdownToggle {
+    border-radius: 0 0 0.5rem 0.5rem;
+  }
+}

@@ -226,7 +226,7 @@ export function DateFilterDropdown({
             >
               <span>By week</span>
               {selectedFilters.some((f) => f.type === 'by-week') && (
-                <span className={styles.badge}>
+                <span>
                   {selectedFilters.filter((f) => f.type === 'by-week').length}
                 </span>
               )}

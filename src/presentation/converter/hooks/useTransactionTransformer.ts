@@ -70,5 +70,15 @@ export function useTransactionTransformer() {
     [useCase]
   );
 
-  return { ...state, transformResults };
+  const reset = useCallback(() => {
+    setState({
+      isTransforming: false,
+      error: null,
+      transactions: [],
+      errors: [],
+      skippedCount: 0,
+    });
+  }, []);
+
+  return { ...state, transformResults, reset };
 }
