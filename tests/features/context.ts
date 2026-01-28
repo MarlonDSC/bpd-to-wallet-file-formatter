@@ -30,6 +30,7 @@ export interface StepContext {
   downloadedFileName?: string;
   expectedDateRange?: { minDate: string; maxDate: string };
   expectExcelError?: boolean;
+  currentWeek?: number;
 }
 
 // Global context object shared across all steps

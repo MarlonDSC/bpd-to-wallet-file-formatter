@@ -1,0 +1,196 @@
+.dropdownContainer {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 300px;
+  overflow: visible;
+}
+
+@media (min-width: 640px) {
+  .dropdownContainer {
+    max-width: 400px;
+  }
+}
+
+.dropdownButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+
+.dropdownButton:hover:not(:disabled) {
+  border-color: var(--color-primary, #3b82f6);
+  background-color: var(--color-background-hover, #f9fafb);
+}
+
+.dropdownButton:focus {
+  outline: none;
+  border-color: var(--color-primary, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.dropdownButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chevronIcon {
+  color: var(--color-text-secondary, #6b7280);
+  transition: transform 0.2s;
+}
+
+.dropdownButton[aria-expanded='true'] .chevronIcon {
+  transform: rotate(180deg);
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 0.25rem;
+  background-color: var(--color-background, #ffffff);
+  border: 1px solid var(--color-border, #d1d5db);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+  max-height: 400px;
+  overflow-y: auto;
+  overflow-x: visible;
+  min-width: 100%;
+  width: max-content;
+  max-width: 500px;
+}
+
+.menuItem {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: none;
+  border: none;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--color-text, #111827);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background-color 0.15s;
+  white-space: nowrap;
+  gap: 0.5rem;
+  position: relative;
+  overflow: visible;
+}
+
+.menuItem > span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuItem:hover:not(:disabled) {
+  background-color: var(--color-background-hover, #f3f4f6);
+}
+
+.menuItem:focus {
+  outline: none;
+  background-color: var(--color-background-hover, #f3f4f6);
+}
+
+.menuItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menuItemSelected {
+  background-color: var(--color-primary-light, #dbeafe);
+  color: var(--color-primary, #3b82f6);
+  font-weight: 500;
+}
+
+.menuItemDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menuItemWithSubmenu {
+  position: relative;
+}
+
+.submenuContainer {
+  position: relative;
+}
+
+.submenu {
+  padding-left: 1rem;
+  background-color: var(--color-background-subtle, #f9fafb);
+  border-top: 1px solid var(--color-border-light, #e5e7eb);
+  border-bottom: 1px solid var(--color-border-light, #e5e7eb);
+}
+
+.submenuItem {
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+}
+
+.menuItemExpanded .chevronIcon {
+  transform: rotate(90deg);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
+  background-color: var(--color-primary, #2563eb);
+  color: #ffffff;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: auto;
+  margin-right: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dropdownButton {
+    background-color: var(--color-background-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .dropdownMenu {
+    background-color: var(--color-background-dark, #1f2937);
+    border-color: var(--color-border-dark, #374151);
+  }
+
+  .menuItem {
+    color: var(--color-text-dark, #f9fafb);
+  }
+
+  .menuItem:hover:not(:disabled) {
+    background-color: var(--color-background-hover-dark, #374151);
+  }
+
+  .menuItemSelected {
+    background-color: var(--color-primary-dark, #1e3a8a);
+    color: var(--color-primary-light, #93c5fd);
+  }
+
+  .submenu {
+    background-color: var(--color-background-subtle-dark, #111827);
+    border-color: var(--color-border-light-dark, #374151);
+  }
+}

@@ -1,0 +1,194 @@
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: light) {
+  .stepper {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.stepContainer {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.stepContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stepCircle {
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: #374151;
+  border: 2px solid #4b5563;
+  color: #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+@media (prefers-color-scheme: light) {
+  .stepCircle {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+    color: #374151;
+  }
+}
+
+.stepCircleCurrent {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.stepCircleCompleted {
+  background-color: #065f46;
+  border-color: #065f46;
+  color: #ffffff;
+}
+
+.stepCirclePast {
+  background-color: #065f46;
+  border-color: #10b981;
+  color: #6ee7b7;
+}
+
+@media (prefers-color-scheme: light) {
+  .stepCirclePast {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+}
+
+.stepNumber {
+  line-height: 1;
+}
+
+.stepLabelContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  padding-top: 0.5rem;
+}
+
+.stepLabel {
+  font-size: 1rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.2s ease;
+}
+
+@media (prefers-color-scheme: light) {
+  .stepLabel {
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.stepLabelCurrent {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+@media (prefers-color-scheme: light) {
+  .stepLabelCurrent {
+    color: rgba(0, 0, 0, 0.95);
+  }
+}
+
+.stepLabelCompleted {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (prefers-color-scheme: light) {
+  .stepLabelCompleted {
+    color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.stepDescription {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s ease;
+}
+
+@media (prefers-color-scheme: light) {
+  .stepDescription {
+    color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.stepDescriptionCurrent {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+@media (prefers-color-scheme: light) {
+  .stepDescriptionCurrent {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.connector {
+  width: 2px;
+  height: 1.5rem;
+  margin-left: 1.25rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: background-color 0.2s ease;
+}
+
+@media (prefers-color-scheme: light) {
+  .connector {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.connectorCompleted {
+  background-color: #10b981;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .stepper {
+    padding: 1rem;
+  }
+
+  .stepCircle {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.75rem;
+  }
+
+  .stepLabel {
+    font-size: 0.875rem;
+  }
+
+  .stepDescription {
+    font-size: 0.8125rem;
+  }
+
+  .connector {
+    margin-left: 1rem;
+  }
+}

@@ -1,18 +1,15 @@
 /**
- * ExcelExportButton - Component for downloading Excel files
+ * ExcelExportButton - Component for downloading Excel files with date filtering
  */
 
-import { useExcelGenerator } from '../hooks/useExcelGenerator';
+import { useDateFilters } from '../hooks/useDateFilters';
+import { useFilteredExcelGenerator } from '../hooks/useFilteredExcelGenerator';
+import { DateFilterDropdown } from './DateFilterDropdown';
 import styles from '../styles/ExcelExportButton.module.css';
+import type { TransactionDto } from '../../../application/transactions/dtos/TransactionDto';
 
 export interface ExcelExportButtonProps {
-  transactions: Array<{
-    date: string;
-    dateImport: string;
-    note: string;
-    currency: string;
-    amount: number;
-  }>;
+  transactions: TransactionDto[];
   disabled?: boolean;
 }
 
@@ -20,18 +17,59 @@ export function ExcelExportButton({
   transactions,
   disabled = false,
 }: Readonly<ExcelExportButtonProps>) {
-  const { isGenerating, error, generateAndDownload } = useExcelGenerator();
+  const {
+    filters,
+    selectedFilter,
+    selectedFilters,
+    isLoading: isLoadingFilters,
+    setSelectedFilter,
+    setSelectedFilters,
+  } = useDateFilters(transactions);
+  const { isGenerating, error, generateAndDownload, generateAndDownloadMultiple } =
+    useFilteredExcelGenerator();
 
   const handleClick = () => {
     if (!disabled && !isGenerating && transactions.length > 0) {
-      generateAndDownload(transactions);
+      // If multiple filters are selected, download multiple files
+      if (selectedFilters.length > 0) {
+        generateAndDownloadMultiple(transactions, selectedFilters);
+      } else if (selectedFilter?.isAvailable) {
+        generateAndDownload(transactions, selectedFilter);
+      }
     }
   };
 
-  const isButtonDisabled = disabled || isGenerating || transactions.length === 0;
+  const hasValidSelection =
+    (selectedFilter?.isAvailable) || selectedFilters.length > 0;
+
+  const isButtonDisabled =
+    disabled ||
+    isGenerating ||
+    transactions.length === 0 ||
+    !hasValidSelection ||
+    isLoadingFilters;
+
+  let buttonText = 'Download Excel';
+  if (selectedFilters.length > 0) {
+    const fileText = selectedFilters.length === 1 ? 'file' : 'files';
+    buttonText = `Download ${selectedFilters.length} Excel ${fileText}`;
+  }
 
   return (
     <div className={styles.exportContainer}>
+      <div className={styles.filterSection}>
+        <label htmlFor="date-filter" className={styles.filterLabel}>
+          Date Filter:
+        </label>
+        <DateFilterDropdown
+          filters={filters}
+          selectedFilter={selectedFilter}
+          selectedFilters={selectedFilters}
+          onSelectFilter={setSelectedFilter}
+          onSelectFilters={setSelectedFilters}
+          disabled={disabled || isLoadingFilters || transactions.length === 0}
+        />
+      </div>
       <button
         type="button"
         onClick={handleClick}
@@ -63,7 +101,7 @@ export function ExcelExportButton({
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Download Excel
+            {buttonText}
           </>
         )}
       </button>

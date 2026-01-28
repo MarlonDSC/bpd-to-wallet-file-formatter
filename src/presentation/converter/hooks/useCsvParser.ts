@@ -47,6 +47,10 @@ export function useCsvParser() {
     [useCase]
   );
 
-  return { ...state, parseFiles };
+  const reset = useCallback(() => {
+    setState({ isParsing: false, error: null, warningCount: 0, results: null });
+  }, []);
+
+  return { ...state, parseFiles, reset };
 }
 

@@ -3,18 +3,26 @@
   width: 100%;
 }
 
-.previewTitle {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #1f2937;
-}
-
 .tableWrapper {
   overflow-x: auto;
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   background-color: #ffffff;
+}
+
+.tableWrapperInSidebar {
+  overflow-x: auto;
+  overflow-y: visible;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tableWrapperInSidebar {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: #1f2937;
+  }
 }
 
 .previewTable {
@@ -33,12 +41,26 @@
   white-space: nowrap;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tableHeader {
+    color: rgba(255, 255, 255, 0.9);
+    background-color: #111827;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
 .tableRow {
   border-bottom: 1px solid #e5e7eb;
 }
 
 .tableRow:hover {
   background-color: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+  .tableRow:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
 }
 
 .tableRow:last-child {
@@ -51,10 +73,184 @@
   vertical-align: top;
 }
 
+@media (prefers-color-scheme: dark) {
+  .tableCell {
+    color: rgba(255, 255, 255, 0.9);
+  }
+}
+
 .amountCell {
   text-align: right;
   font-variant-numeric: tabular-nums;
   font-family: ui-monospace, 'Courier New', monospace;
+}
+
+.viewTableButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.viewTableButton:hover {
+  background-color: #1d4ed8;
+}
+
+.viewTableButton:active {
+  background-color: #1e40af;
+}
+
+.sidebarOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 80%;
+  max-width: 800px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn 0.3s ease-out;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebar {
+    background-color: #1f2937;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  gap: 1rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebarHeader {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background-color: #111827;
+  }
+}
+
+.sidebarTitleContainer {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sidebarTitle {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebarTitle {
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.sidebarSubtitle {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  .sidebarSubtitle {
+    color: rgba(255, 255, 255, 0.85);
+  }
+}
+
+.sidebarSubtitleItem {
+  display: block;
+  line-height: 1.4;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #374151;
+  cursor: pointer;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.closeButton:hover {
+  background-color: #e5e7eb;
+  color: #1f2937;
+}
+
+@media (prefers-color-scheme: dark) {
+  .closeButton {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .closeButton:hover {
+    background-color: #374151;
+    color: rgba(255, 255, 255, 1);
+  }
+}
+
+.sidebarContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem;
+  min-height: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
 }
 
 /* Responsive design */
@@ -66,5 +262,10 @@
   .tableHeader,
   .tableCell {
     padding: 0.5rem;
+  }
+
+  .sidebar {
+    width: 100%;
+    max-width: 100%;
   }
 }

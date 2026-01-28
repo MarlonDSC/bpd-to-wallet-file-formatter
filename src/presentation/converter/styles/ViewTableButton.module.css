@@ -1,0 +1,30 @@
+.viewTableButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.5rem 0 0 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+  flex-shrink: 0;
+}
+
+.viewTableButton:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.viewTableButton:active:not(:disabled) {
+  background-color: #1e40af;
+}
+
+.viewTableButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.viewTableButton svg {
+  flex-shrink: 0;
+}
