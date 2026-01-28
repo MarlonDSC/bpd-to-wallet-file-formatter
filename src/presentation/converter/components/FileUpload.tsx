@@ -284,7 +284,7 @@ export function FileUpload() {
             onViewTable={() => {
               dataPreviewRef.current?.openSidebar();
             }}
-            showViewTable={previewData.rows.length > 5}
+            showViewTable={true}
           />
           <button
             type="button"

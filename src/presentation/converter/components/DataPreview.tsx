@@ -57,8 +57,27 @@ export const DataPreview = forwardRef<DataPreviewHandle, DataPreviewProps>(
   const calculateStats = () => {
     if (rows.length === 0) return null;
 
-    // Parse dates and find range
-    const dates = rows.map((row) => new Date(row.date)).filter((date) => !Number.isNaN(date.getTime()));
+    // Parse dates and find range - handle DD/MM/YYYY format
+    const dates = rows
+      .map((row) => {
+        const dateStr = row.date.trim();
+        // Parse DD/MM/YYYY format (as used in transactions)
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+          const day = Number.parseInt(parts[0], 10);
+          const month = Number.parseInt(parts[1], 10);
+          const year = Number.parseInt(parts[2], 10);
+          if (!Number.isNaN(day) && !Number.isNaN(month) && !Number.isNaN(year)) {
+            const parsed = new Date(year, month - 1, day);
+            return Number.isNaN(parsed.getTime()) ? null : parsed;
+          }
+        }
+        // Fallback to standard Date parsing
+        const parsed = new Date(dateStr);
+        return Number.isNaN(parsed.getTime()) ? null : parsed;
+      })
+      .filter((date): date is Date => date !== null);
+    
     dates.sort((a, b) => a.getTime() - b.getTime());
     
     const firstDate = dates.at(0);
@@ -97,7 +116,7 @@ export const DataPreview = forwardRef<DataPreviewHandle, DataPreviewProps>(
     const hasMultipleCurrencies = currencies.length > 1;
 
     return {
-      dateRange,
+      dateRange: dateRange || null,
       totalAmount,
       currencies,
       hasMultipleCurrencies,
@@ -137,76 +156,66 @@ export const DataPreview = forwardRef<DataPreviewHandle, DataPreviewProps>(
     </table>
   );
 
-  const shouldShowSidebar = rows.length > 5;
-
   return (
-    <div className={styles.previewContainer}>
-      {shouldShowSidebar ? (
+    <>
+      {isSidebarOpen && (
         <>
-          {isSidebarOpen && (
-            <>
-              <div
-                className={styles.sidebarOverlay}
-                onClick={() => setIsSidebarOpen(false)}
-                aria-hidden="true"
-              />
-              <div className={styles.sidebar}>
-                <div className={styles.sidebarHeader}>
-                  <div className={styles.sidebarTitleContainer}>
-                    <h3 className={styles.sidebarTitle}>
-                      Data Preview
-                    </h3>
-                    {stats && (
-                      <div className={styles.sidebarSubtitle}>
-                        {stats.dateRange && (
-                          <span className={styles.sidebarSubtitleItem}>
-                            {stats.dateRange}
-                          </span>
-                        )}
-                        {stats.totalAmount !== 0 && (() => {
-                          let totalText: string;
-                          if (stats.hasMultipleCurrencies) {
-                            totalText = `Total: ${stats.currencies.map(([currency, amount]) => 
-                              `${formatAmount(amount)} ${currency}`
-                            ).join(', ')}`;
-                          } else {
-                            const firstCurrency = stats.currencies.at(0);
-                            const currency = firstCurrency ? firstCurrency[0] : '';
-                            totalText = `Total: ${formatAmount(stats.totalAmount)} ${currency}`;
-                          }
-                          return (
-                            <span className={styles.sidebarSubtitleItem}>
-                              {totalText}
-                            </span>
-                          );
-                        })()}
-                      </div>
+          <div
+            className={styles.sidebarOverlay}
+            onClick={() => setIsSidebarOpen(false)}
+            aria-hidden="true"
+          />
+          <div className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <div className={styles.sidebarTitleContainer}>
+                <h3 className={styles.sidebarTitle}>
+                  Data Preview
+                </h3>
+                {stats && (stats.dateRange || stats.currencies.length > 0) && (
+                  <div className={styles.sidebarSubtitle}>
+                    {stats.dateRange && (
+                      <span className={styles.sidebarSubtitleItem}>
+                        {stats.dateRange}
+                      </span>
                     )}
+                    {stats.currencies.length > 0 && (() => {
+                      let totalText: string;
+                      if (stats.hasMultipleCurrencies) {
+                        totalText = `Total: ${stats.currencies.map(([currency, amount]) => 
+                          `${formatAmount(amount)} ${currency}`
+                        ).join(', ')}`;
+                      } else {
+                        const firstCurrency = stats.currencies.at(0);
+                        const currency = firstCurrency ? firstCurrency[0] : '';
+                        totalText = `Total: ${formatAmount(stats.totalAmount)} ${currency}`;
+                      }
+                      return (
+                        <span className={styles.sidebarSubtitleItem}>
+                          {totalText}
+                        </span>
+                      );
+                    })()}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsSidebarOpen(false)}
-                    className={styles.closeButton}
-                    aria-label="Close sidebar"
-                  >
-                    ×
-                  </button>
-                </div>
-                <div className={styles.sidebarContent}>
-                  <div className={styles.tableWrapperInSidebar}>
-                    {renderTable()}
-                  </div>
-                </div>
+                )}
               </div>
-            </>
-          )}
+              <button
+                type="button"
+                onClick={() => setIsSidebarOpen(false)}
+                className={styles.closeButton}
+                aria-label="Close sidebar"
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.sidebarContent}>
+              <div className={styles.tableWrapperInSidebar}>
+                {renderTable()}
+              </div>
+            </div>
+          </div>
         </>
-      ) : (
-        <div className={styles.tableWrapper}>
-          {renderTable()}
-        </div>
       )}
-    </div>
+    </>
   );
   }
 );
