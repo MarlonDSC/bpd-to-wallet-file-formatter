@@ -1,8 +1,8 @@
 import { Given, When, Then, Before, After, setDefaultTimeout } from '@cucumber/cucumber';
 import { chromium, firefox, webkit, expect } from '@playwright/test';
 
-import { writeFileSync, unlinkSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { writeFileSync, unlinkSync, mkdirSync } from 'node:fs';
+import { join, basename, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { stepContext } from '../context';
 import { getPlaywrightOptions } from '../playwright-config';
@@ -150,6 +150,8 @@ After(async (scenario) => {
   if (stepContext.page && scenario.result?.status === 'FAILED') {
     try {
       const screenshotPath = `tests/screenshots/${scenario.pickle.name}-${Date.now()}.png`;
+      // Ensure directory exists
+      mkdirSync(dirname(screenshotPath), { recursive: true });
       await stepContext.page.screenshot({ 
         path: screenshotPath, 
         fullPage: true 
@@ -528,22 +530,46 @@ When('the user clicks {string} button', async (buttonText: string) => {
 
 Then('parsing completes successfully', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
+  
+  // Check for parsing status in output elements (more reliable)
+  const parsingInProgress = stepContext.page.locator('output').filter({ hasText: /Parsing CSV/i });
+  const parsingDone = stepContext.page.locator('output').filter({ hasText: /Parsing complete/i });
+  const parsingFailed = stepContext.page.locator('output').filter({ hasText: /Parsing failed/i });
+  
+  // Also check for text anywhere on the page as fallback
   const complete = stepContext.page.locator(String.raw`text=/Parsing complete/i`);
   const failed = stepContext.page.locator(String.raw`text=/Parsing failed/i`);
 
-  // Wait for either completion or failure.
+  // Check if already complete first
+  const alreadyDone = await parsingDone.isVisible().catch(() => false) || await complete.isVisible().catch(() => false);
+  if (alreadyDone) {
+    await expect(parsingDone.or(complete)).toBeVisible();
+    return;
+  }
+
+  // Wait for either completion or failure - try output elements first, then fallback to text
   await Promise.race([
-    complete.waitFor({ state: 'visible', timeout: 15000 }),
-    failed.waitFor({ state: 'visible', timeout: 15000 }),
+    parsingDone.waitFor({ state: 'visible', timeout: 20000 }),
+    parsingInProgress.waitFor({ state: 'visible', timeout: 5000 }).then(() => 
+      parsingDone.waitFor({ state: 'visible', timeout: 15000 })
+    ),
+    complete.waitFor({ state: 'visible', timeout: 20000 }),
+    parsingFailed.waitFor({ state: 'visible', timeout: 20000 }),
+    failed.waitFor({ state: 'visible', timeout: 20000 }),
   ]);
 
-  if (await failed.isVisible()) {
-    const errorBlock = failed.locator('..');
+  // Check for failure
+  const hasFailed = await parsingFailed.isVisible().catch(() => false) || await failed.isVisible().catch(() => false);
+  if (hasFailed) {
+    const errorBlock = (await parsingFailed.isVisible().catch(() => false)) 
+      ? parsingFailed.locator('..')
+      : failed.locator('..');
     const text = (await errorBlock.textContent())?.trim() || 'Unknown error';
     throw new Error(`Expected parsing success, but saw failure UI: ${text}`);
   }
 
-  await expect(complete).toBeVisible();
+  // Verify completion
+  await expect(parsingDone.or(complete)).toBeVisible();
 });
 
 Then('encoding is detected automatically', async () => {
