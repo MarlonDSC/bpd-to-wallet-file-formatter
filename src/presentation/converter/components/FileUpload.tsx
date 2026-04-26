@@ -5,7 +5,9 @@
 import { useRef, useEffect, useMemo } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useCsvParser } from '../hooks/useCsvParser';
+import { usePdfParser } from '../hooks/usePdfParser';
 import { useTransactionTransformer } from '../hooks/useTransactionTransformer';
+import type { BpdUploadMode } from '../../../domain/files/value-objects/BpdUploadMode';
 import { Stepper } from './Stepper';
 import { ConversionStatus } from './ConversionStatus';
 import { DataPreview, type DataPreviewHandle } from './DataPreview';
@@ -22,6 +24,8 @@ export function FileUpload() {
     hasErrors,
     errors,
     isDragging,
+    uploadMode,
+    setUploadMode,
     handleFileSelect,
     handleDragOver,
     handleDragLeave,
@@ -31,8 +35,29 @@ export function FileUpload() {
     clearAll,
   } = useFileUpload();
 
-  const { isParsing, error: csvError, warningCount, results, parseFiles, reset: resetParser } =
-    useCsvParser();
+  const {
+    isParsing: isParsingCsv,
+    error: csvError,
+    warningCount: csvWarningCount,
+    results: csvResults,
+    parseFiles,
+    reset: resetCsvParser,
+  } = useCsvParser();
+
+  const {
+    isParsing: isParsingPdf,
+    error: pdfError,
+    warningCount: pdfWarningCount,
+    results: pdfResults,
+    parsePdfFiles,
+    reset: resetPdfParser,
+  } = usePdfParser();
+
+  const isPdfMode = uploadMode === 'bpd-pdf';
+  const isParsing = isPdfMode ? isParsingPdf : isParsingCsv;
+  const parseError = isPdfMode ? pdfError : csvError;
+  const warningCount = isPdfMode ? pdfWarningCount : csvWarningCount;
+  const results = isPdfMode ? pdfResults : csvResults;
 
   const {
     isTransforming,
@@ -44,12 +69,22 @@ export function FileUpload() {
     reset: resetTransformer,
   } = useTransactionTransformer();
 
+  function changeUploadMode(mode: BpdUploadMode) {
+    if (mode === uploadMode) {
+      return;
+    }
+    resetCsvParser();
+    resetPdfParser();
+    resetTransformer();
+    setUploadMode(mode);
+  }
+
   // Automatically trigger transformation when parsing completes successfully
   useEffect(() => {
-    if (results && results.length > 0 && !isParsing && !csvError) {
+    if (results && results.length > 0 && !isParsing && !parseError) {
       transformResults(results);
     }
-  }, [results, isParsing, csvError, transformResults]);
+  }, [results, isParsing, parseError, transformResults]);
 
   const handleChooseFilesClick = () => {
     fileInputRef.current?.click();
@@ -82,13 +117,15 @@ export function FileUpload() {
   }, [transactions]);
 
   // Determine current step for stepper
-  const isConversionComplete = !isParsing && !isTransforming && transactions.length > 0 && !transformError;
+  const isConversionComplete =
+    !isParsing && !isTransforming && transactions.length > 0 && !transformError;
   const currentStep = isConversionComplete ? 1 : 0;
   const completedSteps = isConversionComplete ? [0] : [];
 
   // Handle clear/reset
   const handleClear = () => {
-    resetParser();
+    resetCsvParser();
+    resetPdfParser();
     resetTransformer();
     clearAll();
   };
@@ -99,7 +136,9 @@ export function FileUpload() {
     const fileText = fileCount === 1 ? 'file' : 'files';
     uploadDescription = `${fileCount} ${fileText} uploaded`;
   } else {
-    uploadDescription = 'Select CSV files to convert';
+    uploadDescription = isPdfMode
+      ? 'Select BPD statement PDF files to convert'
+      : 'Select BPD CSV files to convert';
   }
   
   let convertDescription: string;
@@ -112,8 +151,27 @@ export function FileUpload() {
 
   return (
     <div className={styles.fileUploadContainer}>
-      <h2 className={styles.title}>Upload BPD CSV Files</h2>
-      
+      <h2 className={styles.title}>Upload BPD files</h2>
+
+      <div className={styles.modeToggle} role="group" aria-label="Statement format">
+        <button
+          type="button"
+          className={`${styles.modeButton} ${!isPdfMode ? styles.modeButtonActive : ''}`}
+          onClick={() => changeUploadMode('bpd-csv')}
+          aria-pressed={!isPdfMode}
+        >
+          CSV statement
+        </button>
+        <button
+          type="button"
+          className={`${styles.modeButton} ${isPdfMode ? styles.modeButtonActive : ''}`}
+          onClick={() => changeUploadMode('bpd-pdf')}
+          aria-pressed={isPdfMode}
+        >
+          PDF statement
+        </button>
+      </div>
+
       {/* Stepper */}
       <Stepper
         steps={[
@@ -165,7 +223,9 @@ export function FileUpload() {
               <p className={styles.dropZoneText}>
                 {isDragging
                   ? 'Drop files here'
-                  : 'Drag and drop CSV files here, or click to browse'}
+                  : isPdfMode
+                    ? 'Drag and drop PDF files here, or click to browse'
+                    : 'Drag and drop CSV files here, or click to browse'}
               </p>
               <p className={styles.dropZoneHint}>
                 Maximum file size: 10MB per file
@@ -177,11 +237,11 @@ export function FileUpload() {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".csv"
+            accept={isPdfMode ? '.pdf,application/pdf' : '.csv,text/csv'}
             multiple
             onChange={handleFileSelect}
             className={styles.hiddenInput}
-            aria-label="Choose CSV files"
+            aria-label={isPdfMode ? 'Choose PDF files' : 'Choose CSV files'}
           />
 
           {/* Choose Files Button */}
@@ -247,16 +307,21 @@ export function FileUpload() {
               <button
                 type="button"
                 className={styles.convertButton}
-                onClick={() => parseFiles(files)}
+                onClick={() =>
+                  isPdfMode ? parsePdfFiles(files) : parseFiles(files)
+                }
                 disabled={isParsing || isTransforming || hasErrors || fileCount === 0}
-                aria-label="Convert and parse CSV files"
+                aria-label={
+                  isPdfMode ? 'Convert and parse PDF statements' : 'Convert and parse CSV files'
+                }
               >
                 {getConvertButtonText()}
               </button>
 
               <ConversionStatus
+                isPdfSource={isPdfMode}
                 isParsing={isParsing}
-                parsingError={csvError}
+                parsingError={parseError}
                 parsingWarningCount={warningCount}
                 parsingResults={results}
                 isTransforming={isTransforming}
