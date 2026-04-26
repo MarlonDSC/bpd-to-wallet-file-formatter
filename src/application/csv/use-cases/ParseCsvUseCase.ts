@@ -28,7 +28,15 @@ export class ParseCsvUseCase {
   async execute(input: CsvFileDto): Promise<Result<CsvParseResultDto, CsvError>> {
     try {
       const parsed = await this.csvParserService.parse(input.file);
+      if (import.meta.env.DEV) {
+        console.log('[ParseCsv] file:', input.file.name, 'encoding:', parsed.encoding, 'raw rows:', parsed.rows.length);
+        console.log('[ParseCsv] raw rows (first 15):', parsed.rows.slice(0, 15));
+      }
       const adapted = this.bpdCsvAdapter.adapt(parsed.rows);
+      if (import.meta.env.DEV) {
+        console.log('[ParseCsv] adapted transactions:', adapted.rows.length, adapted.metadata);
+        console.log('[ParseCsv] first rows:', adapted.rows.slice(0, 5));
+      }
       const dto = CsvMapper.toParseResultDto({
         adapted,
         encoding: parsed.encoding,
