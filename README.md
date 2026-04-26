@@ -3,11 +3,12 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=CodeFlow-Dynamics_bpd-to-wallet-file-formatter&metric=alert_status&token=66001666be4548f75c677236426593a24a93c6c0)](https://sonarcloud.io/summary/new_code?id=CodeFlow-Dynamics_bpd-to-wallet-file-formatter)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=CodeFlow-Dynamics_bpd-to-wallet-file-formatter&metric=coverage&token=66001666be4548f75c677236426593a24a93c6c0)](https://sonarcloud.io/summary/new_code?id=CodeFlow-Dynamics_bpd-to-wallet-file-formatter)
 
-A React application to convert BPD CSV files to wallet format, built with Domain-Driven Design (DDD) and Behavior-Driven Development (BDD) principles.
+A React application to convert BPD CSV or text-based PDF statements to wallet format, built with Domain-Driven Design (DDD) and Behavior-Driven Development (BDD) principles.
 
 ## Features
 
-- 📁 Upload and validate BPD CSV files
+- 📁 Upload and validate BPD CSV files, or BPD statement PDFs (text-based; not scanned)
+- 📄 PDF mode uses **Fecha efectiva** as the transaction date (wallet “Date” column); amounts support formats like `$464.62-` and `$51,029.76`
 - 🔄 Transform data to wallet format
 - 📊 Preview and validate transactions
 - 💾 Export to Excel format
@@ -15,6 +16,10 @@ A React application to convert BPD CSV files to wallet format, built with Domain
 - 🧪 Comprehensive test coverage (Unit, Integration, E2E, BDD, Visual Regression)
 - 🔍 Static code analysis with SonarCloud
 - 📸 Visual regression testing (Golden tests)
+
+## PDF statement import
+
+Use the **PDF statement** toggle on the upload screen. Parsing expects a text-based BPD statement whose table includes the headers **Fecha efectiva**, **Descripción**, and **Monto** (same logical layout as the CSV export). The app uses **Fecha efectiva** as the wallet transaction date. Scanned or image-only PDFs are not supported (no OCR). Layout quirks in some PDFs can affect how rows are detected.
 
 ## Tech Stack
 

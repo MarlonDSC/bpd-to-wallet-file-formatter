@@ -6,7 +6,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>BPD to Wallet File Formatter</h1>
-        <p>Convert your BPD CSV files to wallet format</p>
+        <p>Convert your BPD CSV or text-based PDF statements to wallet format</p>
       </header>
       <main className="app-main">
         <FileUpload />
