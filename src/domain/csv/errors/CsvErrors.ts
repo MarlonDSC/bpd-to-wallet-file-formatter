@@ -17,10 +17,12 @@ export class InvalidCsvFormatError extends CsvError {
 }
 
 export class MissingColumnError extends CsvError {
-  constructor(expected: string[]) {
-    super(
-      `CSV file is missing required columns. Expected: ${expected.join(', ')}`
-    );
+  constructor(expected: string[], source: 'csv' | 'pdf' = 'csv') {
+    const prefix =
+      source === 'csv'
+        ? 'CSV file is missing required columns.'
+        : 'PDF statement is missing required columns.';
+    super(`${prefix} Expected: ${expected.join(', ')}`);
     this.name = 'MissingColumnError';
   }
 }
