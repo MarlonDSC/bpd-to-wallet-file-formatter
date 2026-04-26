@@ -2,9 +2,10 @@
  * useFileUpload - Custom hook for file upload functionality
  */
 
-import { useReducer, useCallback, useRef } from 'react';
+import { useReducer, useCallback, useRef, useState } from 'react';
 import { ValidateFileUseCase } from '../../../application/files/use-cases/ValidateFileUseCase';
 import { FileMapper } from '../../../application/files/mappers/FileMapper';
+import type { BpdUploadMode } from '../../../domain/files/value-objects/BpdUploadMode';
 import {
   initialFileUploadState,
   fileUploadReducer,
@@ -14,13 +15,19 @@ import {
 export function useFileUpload() {
   const [state, dispatch] = useReducer(fileUploadReducer, initialFileUploadState);
   const validateFileUseCase = useRef(new ValidateFileUseCase()).current;
+  const [uploadMode, setUploadModeState] = useState<BpdUploadMode>('bpd-csv');
+
+  const setUploadMode = useCallback((mode: BpdUploadMode) => {
+    dispatch({ type: 'CLEAR_ALL' });
+    setUploadModeState(mode);
+  }, []);
 
   const handleFiles = useCallback(
     (files: FileList | File[]) => {
       const fileArray = Array.from(files);
       
       fileArray.forEach((file) => {
-        const result = validateFileUseCase.execute(file);
+        const result = validateFileUseCase.execute(file, undefined, uploadMode);
         
         if (result.success) {
           const viewModel = FileMapper.toViewModelFromDto(result.data);
@@ -30,7 +37,7 @@ export function useFileUpload() {
         }
       });
     },
-    [validateFileUseCase]
+    [validateFileUseCase, uploadMode]
   );
 
   const handleFileSelect = useCallback(
@@ -98,6 +105,8 @@ export function useFileUpload() {
     hasErrors: selectors.hasErrors(state),
     errors: selectors.getErrors(state),
     isDragging: selectors.isDragging(state),
+    uploadMode,
+    setUploadMode,
     handleFileSelect,
     handleDragOver,
     handleDragLeave,
