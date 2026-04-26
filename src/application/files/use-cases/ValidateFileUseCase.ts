@@ -4,6 +4,7 @@
 
 import { FileMapper } from '../mappers/FileMapper';
 import type { UploadedFileDto } from '../dtos/UploadedFileDto';
+import type { BpdUploadMode } from '../../../domain/files/value-objects/BpdUploadMode';
 import { FileError } from '../../../domain/files/errors/FileErrors';
 
 export type Result<T, E> = 
@@ -11,10 +12,14 @@ export type Result<T, E> =
   | { success: false; error: E };
 
 export class ValidateFileUseCase {
-  execute(file: File, id?: string): Result<UploadedFileDto, FileError> {
+  execute(
+    file: File,
+    id?: string,
+    mode: BpdUploadMode = 'bpd-csv'
+  ): Result<UploadedFileDto, FileError> {
     try {
       const uploadedFile = FileMapper.toDomain(file, id);
-      uploadedFile.validate();
+      uploadedFile.validate(mode);
       
       const dto = FileMapper.toDto(uploadedFile);
       return { success: true, data: dto };
