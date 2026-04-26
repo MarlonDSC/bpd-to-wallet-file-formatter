@@ -70,6 +70,18 @@ describe('FileType', () => {
     });
   });
 
+  describe('isPdf', () => {
+    it('should return true for PDF extension', () => {
+      const fileType = FileType.create('pdf');
+      expect(fileType.isPdf()).toBe(true);
+    });
+
+    it('should return false for non-PDF extension', () => {
+      const fileType = FileType.create('csv');
+      expect(fileType.isPdf()).toBe(false);
+    });
+  });
+
   describe('equals', () => {
     it('should return true for equal file types', () => {
       const type1 = FileType.create('csv');

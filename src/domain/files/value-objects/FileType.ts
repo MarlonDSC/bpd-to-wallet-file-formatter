@@ -37,6 +37,10 @@ export class FileType {
     return this.extension === 'csv';
   }
 
+  isPdf(): boolean {
+    return this.extension === 'pdf';
+  }
+
   equals(other: FileType): boolean {
     return this.extension === other.extension;
   }
