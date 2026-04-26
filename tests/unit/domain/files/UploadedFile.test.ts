@@ -13,6 +13,7 @@ describe('UploadedFile', () => {
   let largeFile: File;
   let emptyFile: File;
   let txtFile: File;
+  let pdfFile: File;
 
   beforeEach(() => {
     // Create mock File objects
@@ -22,6 +23,7 @@ describe('UploadedFile', () => {
     });
     emptyFile = new File([], 'empty.csv', { type: 'text/csv' });
     txtFile = new File(['content'], 'test.txt', { type: 'text/plain' });
+    pdfFile = new File(['%PDF-1.4'], 'stmt.pdf', { type: 'application/pdf' });
   });
 
   describe('fromFile', () => {
@@ -79,6 +81,16 @@ describe('UploadedFile', () => {
     it('should throw InvalidFileTypeError for non-CSV file', () => {
       const uploadedFile = UploadedFile.fromFile(txtFile);
       expect(() => uploadedFile.validate()).toThrow(InvalidFileTypeError);
+    });
+
+    it('should accept PDF in bpd-pdf mode', () => {
+      const uploadedFile = UploadedFile.fromFile(pdfFile);
+      expect(() => uploadedFile.validate('bpd-pdf')).not.toThrow();
+    });
+
+    it('should reject PDF in default bpd-csv mode', () => {
+      const uploadedFile = UploadedFile.fromFile(pdfFile);
+      expect(() => uploadedFile.validate('bpd-csv')).toThrow(InvalidFileTypeError);
     });
 
     it('should throw FileTooLargeError for file exceeding 10MB', () => {
