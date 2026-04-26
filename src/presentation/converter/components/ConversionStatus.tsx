@@ -9,6 +9,8 @@ import type { TransactionError } from '../../../domain/transactions/errors/Trans
 import styles from '../styles/FileUpload.module.css';
 
 type Props = Readonly<{
+  /** When true, status copy refers to PDF instead of CSV. */
+  isPdfSource?: boolean;
   // Parsing state
   isParsing: boolean;
   parsingError: CsvError | null;
@@ -24,6 +26,7 @@ type Props = Readonly<{
 
 export function ConversionStatus(props: Props) {
   const {
+    isPdfSource = false,
     isParsing,
     parsingError,
     parsingWarningCount,
@@ -39,9 +42,11 @@ export function ConversionStatus(props: Props) {
   if (isParsing) {
     return (
       <output className={styles.csvStatus} aria-live="polite">
-        <strong>Parsing CSV…</strong>
+        <strong>{isPdfSource ? 'Parsing PDF…' : 'Parsing CSV…'}</strong>
         <div className={styles.csvStatusSubtext}>
-          Detecting encoding, headers, and extracting transactions.
+          {isPdfSource
+            ? 'Extracting text, locating statement headers, and building transaction rows.'
+            : 'Detecting encoding, headers, and extracting transactions.'}
         </div>
       </output>
     );
