@@ -23,9 +23,9 @@
   },
   "dependencies": {
     "papaparse": "^5.5.3",
-    "pdfjs-dist": "^5.4.296",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "pdfjs-dist": "^5.6.205",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -39,7 +39,7 @@
     "@types/node": "^24.10.9",
     "@types/papaparse": "^5.5.2",
     "@types/pngjs": "^6.0.5",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "@vitest/coverage-v8": "^4.0.18",
