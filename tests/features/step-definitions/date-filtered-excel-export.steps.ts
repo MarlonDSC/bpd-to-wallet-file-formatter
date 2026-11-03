@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/prefer-replace-all, sonarjs/no-hardcoded-strings */
 /**
  * SonarCloud suppressions:
  * - String.raw cannot be used in Cucumber step definitions - Cucumber's matcher requires escaped parentheses
@@ -46,15 +45,6 @@ function getWeekNumber(date: Date): { year: number; weekNumber: number } {
   const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
   const weekNumber = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
   return { year: d.getUTCFullYear(), weekNumber };
-}
-
-// Helper function to get month name
-function getMonthName(month: number): string {
-  const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-  return monthNames[month - 1];
 }
 
 // Cleanup downloaded files after tests
@@ -227,7 +217,7 @@ Given('transaction data contains transactions from the previous week', async () 
   ).toBeVisible({ timeout: 15000 });
 });
 
-Given('transaction data only contains transactions up to week {int}', async (weekNumber: number) => {
+Given('transaction data only contains transactions up to week {int}', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   
   // Wait for any existing conversion to complete first
@@ -742,7 +732,7 @@ Then('the filename matches pattern {string}', async (pattern: string) => {
   // YYYY_W[week-number].xlsx -> \d{4}_W\d+\.xlsx
   // YYYY_Mmm_DD.xlsx -> \d{4}_[A-Za-z]{3}_\d{1,2}\.xlsx
   
-  let regexPattern = pattern
+  const regexPattern = pattern
     .replace(/YYYY/g, '\\d{4}')
     .replace(/MM/g, '\\d{2}')
     .replace(/DD/g, '\\d{2}')
@@ -896,7 +886,7 @@ Then('each filename matches pattern {string}', async (pattern: string) => {
     throw new Error('No file downloaded yet');
   }
   
-  let regexPattern = pattern
+  const regexPattern = pattern
     .replace(/YYYY/g, '\\d{4}')
     .replace(/MM/g, '\\d{2}')
     .replace(/DD/g, '\\d{2}')

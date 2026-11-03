@@ -1,4 +1,3 @@
-/* eslint-disable sonarjs/prefer-replace-all, sonarjs/no-hardcoded-strings */
 /**
  * SonarCloud suppressions:
  * - String.raw cannot be used in Cucumber step definitions - Cucumber's matcher requires escaped parentheses
@@ -27,30 +26,6 @@ const testFilesDir = tmpdir();
 // Type alias for Excel worksheet data
 type ExcelRowData = Array<string | number | Date>;
 type ExcelData = Array<ExcelRowData>;
-
-// Helper function to parse date string DD/MM/YYYY to Date
-function parseDate(dateString: string): Date | null {
-  const [day, month, year] = dateString.split('/').map(Number);
-  if (!day || !month || !year) return null;
-  const date = new Date(year, month - 1, day);
-  // Validate date
-  if (
-    date.getDate() === day &&
-    date.getMonth() === month - 1 &&
-    date.getFullYear() === year
-  ) {
-    return date;
-  }
-  return null;
-}
-
-// Helper function to format date as DD/MM/YYYY
-function formatDate(date: Date): string {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
 
 // Cleanup downloaded files after tests
 After(async () => {
@@ -381,7 +356,6 @@ Then('a table is shown with columns: {string}', async (columnsString: string) =>
   for (const column of expectedColumns) {
     // Escape special regex characters
     // NOSONAR: replace() with global regex is more compatible than replaceAll(), and String.raw breaks regex escaping
-    // eslint-disable-next-line sonarjs/prefer-replace-all, sonarjs/no-hardcoded-strings
     const escapedColumn = column.replace(/[()]/g, '\\$&'); // NOSONAR
     const header = table.locator('th').filter({ hasText: new RegExp(`^${escapedColumn}$`, 'i') }).first();
     await expect(header).toBeVisible({ timeout: 5000 });
@@ -403,7 +377,6 @@ Then('a table is shown with columns: Date, Date \\(Import\\), Note, Currency, Am
   for (const column of expectedColumns) {
     // Escape special regex characters in column name
     // NOSONAR: replace() with global regex is more compatible than replaceAll(), and String.raw breaks regex escaping
-    // eslint-disable-next-line sonarjs/prefer-replace-all, sonarjs/no-hardcoded-strings
     const escapedColumn = column.replace(/[()]/g, '\\$&'); // NOSONAR
     // Use exact match to avoid matching "Date" when looking for "Date (Import)"
     const header = table.locator('th').filter({ hasText: new RegExp(`^${escapedColumn}$`, 'i') }).first();
@@ -686,9 +659,7 @@ Then('the file name includes the date range', async () => {
   if (stepContext.expectedDateRange) {
     const { minDate, maxDate } = stepContext.expectedDateRange;
     // NOSONAR: replace() with global regex is more compatible than replaceAll() across TypeScript versions
-    // eslint-disable-next-line sonarjs/prefer-replace-all
     const minDateFormatted = minDate.replace(/\//g, '-'); // NOSONAR
-    // eslint-disable-next-line sonarjs/prefer-replace-all
     const maxDateFormatted = maxDate.replace(/\//g, '-'); // NOSONAR
     
     expect(stepContext.downloadedFileName).toContain(minDateFormatted);

@@ -650,7 +650,7 @@ Then('no transaction data is extracted', async () => {
   await expect(stepContext.page.locator(String.raw`text=/Extracted \d+ transaction rows/`)).not.toBeVisible();
 });
 
-Then('header rows lines {int}-{int} are skipped', async (_from: number, _to: number) => {
+Then('header rows lines {int}-{int} are skipped', async () => {
   // Indirect assertion: our fixtures include 10 metadata rows before the header.
   // If parsing completes successfully and rows are extracted, metadata rows were skipped.
   if (!stepContext.page) throw new Error('Page not initialized');
@@ -1008,7 +1008,7 @@ When('all transactions are transformed', async () => {
   });
 });
 
-Then('the Date is {string}', async (expectedDate: string) => {
+Then('the Date is {string}', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   // Verify transformation completed successfully
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
@@ -1016,56 +1016,56 @@ Then('the Date is {string}', async (expectedDate: string) => {
   });
 });
 
-Then(String.raw`the Date \(Import\) is {string} \(date + 1 day\)`, async (expectedDateImport: string) => {
+Then(String.raw`the Date \(Import\) is {string} \(date + 1 day\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then(String.raw`the Date \(Import\) is {string} \(correctly handles month boundary\)`, async (expectedDateImport: string) => {
+Then(String.raw`the Date \(Import\) is {string} \(correctly handles month boundary\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then(String.raw`the Date \(Import\) is {string} \(correctly handles year boundary\)`, async (expectedDateImport: string) => {
+Then(String.raw`the Date \(Import\) is {string} \(correctly handles year boundary\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then('the Note is {string}', async (expectedNote: string) => {
+Then('the Note is {string}', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then('the Currency is {string}', async (expectedCurrency: string) => {
+Then('the Currency is {string}', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then(String.raw`the Amount is {string} \(positive for credit\)`, async (expectedAmount: string) => {
+Then(String.raw`the Amount is {string} \(positive for credit\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then(String.raw`the Amount is {string} \(negative for debit\)`, async (expectedAmount: string) => {
+Then(String.raw`the Amount is {string} \(negative for debit\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
   });
 });
 
-Then(String.raw`the Amount is formatted as {string} \(rounded to 2 decimal places\)`, async (expectedAmount: string) => {
+Then(String.raw`the Amount is formatted as {string} \(rounded to 2 decimal places\)`, async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
@@ -1086,7 +1086,7 @@ Then('the transaction type is identified as debit', async () => {
   });
 });
 
-Then('the Note preserves special characters {string}', async (expectedNote: string) => {
+Then('the Note preserves special characters {string}', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
   await expect(stepContext.page.locator(String.raw`text=/Transformation complete/i`)).toBeVisible({
     timeout: 5000,
