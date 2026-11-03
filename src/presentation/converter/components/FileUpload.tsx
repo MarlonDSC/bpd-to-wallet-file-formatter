@@ -7,7 +7,11 @@ import { useFileUpload } from '../hooks/useFileUpload';
 import { useCsvParser } from '../hooks/useCsvParser';
 import { usePdfParser } from '../hooks/usePdfParser';
 import { useTransactionTransformer } from '../hooks/useTransactionTransformer';
-import type { BpdUploadMode } from '../../../domain/files/value-objects/BpdUploadMode';
+import {
+  isPdfUploadMode,
+  pdfLayoutForUploadMode,
+  type BpdUploadMode,
+} from '../../../domain/files/value-objects/BpdUploadMode';
 import { Stepper } from './Stepper';
 import { ConversionStatus } from './ConversionStatus';
 import { DataPreview, type DataPreviewHandle } from './DataPreview';
@@ -53,7 +57,8 @@ export function FileUpload() {
     reset: resetPdfParser,
   } = usePdfParser();
 
-  const isPdfMode = uploadMode === 'bpd-pdf';
+  const isPdfMode = isPdfUploadMode(uploadMode);
+  const pdfLayout = pdfLayoutForUploadMode(uploadMode);
   const isParsing = isPdfMode ? isParsingPdf : isParsingCsv;
   const parseError = isPdfMode ? pdfError : csvError;
   const warningCount = isPdfMode ? pdfWarningCount : csvWarningCount;
@@ -135,10 +140,12 @@ export function FileUpload() {
   if (fileCount > 0) {
     const fileText = fileCount === 1 ? 'file' : 'files';
     uploadDescription = `${fileCount} ${fileText} uploaded`;
+  } else if (uploadMode === 'bpd-pdf-print') {
+    uploadDescription = 'Select bank-print PDF statements to convert';
+  } else if (uploadMode === 'bpd-pdf-inbox') {
+    uploadDescription = 'Select emailed inbox PDF statements to convert';
   } else {
-    uploadDescription = isPdfMode
-      ? 'Select BPD statement PDF files to convert'
-      : 'Select BPD CSV files to convert';
+    uploadDescription = 'Select BPD CSV files to convert';
   }
   
   let convertDescription: string;
@@ -156,19 +163,27 @@ export function FileUpload() {
       <div className={styles.modeToggle} role="group" aria-label="Statement format">
         <button
           type="button"
-          className={`${styles.modeButton} ${!isPdfMode ? styles.modeButtonActive : ''}`}
+          className={`${styles.modeButton} ${uploadMode === 'bpd-csv' ? styles.modeButtonActive : ''}`}
           onClick={() => changeUploadMode('bpd-csv')}
-          aria-pressed={!isPdfMode}
+          aria-pressed={uploadMode === 'bpd-csv'}
         >
           CSV statement
         </button>
         <button
           type="button"
-          className={`${styles.modeButton} ${isPdfMode ? styles.modeButtonActive : ''}`}
-          onClick={() => changeUploadMode('bpd-pdf')}
-          aria-pressed={isPdfMode}
+          className={`${styles.modeButton} ${uploadMode === 'bpd-pdf-print' ? styles.modeButtonActive : ''}`}
+          onClick={() => changeUploadMode('bpd-pdf-print')}
+          aria-pressed={uploadMode === 'bpd-pdf-print'}
         >
-          PDF statement
+          PDF print
+        </button>
+        <button
+          type="button"
+          className={`${styles.modeButton} ${uploadMode === 'bpd-pdf-inbox' ? styles.modeButtonActive : ''}`}
+          onClick={() => changeUploadMode('bpd-pdf-inbox')}
+          aria-pressed={uploadMode === 'bpd-pdf-inbox'}
+        >
+          PDF inbox
         </button>
       </div>
 
@@ -224,7 +239,9 @@ export function FileUpload() {
                 {isDragging
                   ? 'Drop files here'
                   : isPdfMode
-                    ? 'Drag and drop PDF files here, or click to browse'
+                    ? uploadMode === 'bpd-pdf-print'
+                      ? 'Drag and drop bank-print PDF files here, or click to browse'
+                      : 'Drag and drop inbox PDF files here, or click to browse'
                     : 'Drag and drop CSV files here, or click to browse'}
               </p>
               <p className={styles.dropZoneHint}>
@@ -308,11 +325,17 @@ export function FileUpload() {
                 type="button"
                 className={styles.convertButton}
                 onClick={() =>
-                  isPdfMode ? parsePdfFiles(files) : parseFiles(files)
+                  isPdfMode && pdfLayout
+                    ? parsePdfFiles(files, pdfLayout)
+                    : parseFiles(files)
                 }
                 disabled={isParsing || isTransforming || hasErrors || fileCount === 0}
                 aria-label={
-                  isPdfMode ? 'Convert and parse PDF statements' : 'Convert and parse CSV files'
+                  uploadMode === 'bpd-pdf-print'
+                    ? 'Convert and parse bank-print PDF statements'
+                    : uploadMode === 'bpd-pdf-inbox'
+                      ? 'Convert and parse inbox PDF statements'
+                      : 'Convert and parse CSV files'
                 }
               >
                 {getConvertButtonText()}
