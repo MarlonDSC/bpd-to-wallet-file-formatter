@@ -7,8 +7,8 @@ A React application to convert BPD CSV or text-based PDF statements to wallet fo
 
 ## Features
 
-- 📁 Upload and validate BPD CSV files, or BPD statement PDFs (text-based; not scanned)
-- 📄 PDF mode uses **Fecha efectiva** as the transaction date (wallet “Date” column); amounts support formats like `$464.62-` and `$51,029.76`
+- 📁 Upload and validate BPD CSV, **bank-print** PDFs, or **inbox** PDFs (text-based; not scanned)
+- 📄 PDF modes map **Fecha efectiva** / **FECHA TRANSAC.** to the wallet “Date” column; amounts support `$464.62-`, signed inbox values, and `$51,029.76`
 - 🔄 Transform data to wallet format
 - 📊 Preview and validate transactions
 - 💾 Export to Excel format
@@ -19,7 +19,12 @@ A React application to convert BPD CSV or text-based PDF statements to wallet fo
 
 ## PDF statement import
 
-Use the **PDF statement** toggle on the upload screen. Parsing expects a text-based BPD statement whose table includes the headers **Fecha efectiva**, **Descripción**, and **Monto** (same logical layout as the CSV export). The app uses **Fecha efectiva** as the wallet transaction date. Scanned or image-only PDFs are not supported (no OCR). Layout quirks in some PDFs can affect how rows are detected.
+The upload screen has three formats: **CSV statement**, **PDF print**, and **PDF inbox**. PDF parsing is text-based only (not scanned / image-only; no OCR):
+
+- **PDF print** (from bank account): headers **Fecha efectiva**, **Descripción**, and **Monto**. Wallet date = **Fecha efectiva**.
+- **PDF inbox** (emailed statement): headers **DETALLE**, **DÉBITO RD$**, **CRÉDITO RD$** (with **FECHAS DE ENTRADA** / **TRANSAC.**). Wallet date = **FECHA TRANSAC.** (abbreviated dates like `15JUN` use the statement’s year).
+
+Layout quirks in some PDFs can affect how rows are detected.
 
 ## Tech Stack
 

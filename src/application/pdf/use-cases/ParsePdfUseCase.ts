@@ -32,7 +32,7 @@ export class ParsePdfUseCase {
         console.log('[ParsePdf] file:', input.file.name, 'text grid rows:', rows.length);
         console.log('[ParsePdf] text grid (first 25 rows):', rows.slice(0, 25));
       }
-      const adapted = this.bpdPdfAdapter.adapt(rows);
+      const adapted = this.bpdPdfAdapter.adapt(rows, input.layout ?? 'print');
       if (import.meta.env.DEV) {
         console.log('[ParsePdf] adapted transactions:', adapted.rows.length, adapted.metadata);
         console.log('[ParsePdf] first rows (fechaPosteo=fecha efectiva):', adapted.rows.slice(0, 5));

@@ -5,6 +5,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { ParsePdfUseCase } from '../../../application/pdf/use-cases/ParsePdfUseCase';
 import type { CsvParseResultDto } from '../../../application/csv/dtos/CsvParseResultDto';
+import type { BpdPdfLayout } from '../../../domain/files/value-objects/BpdUploadMode';
 import type { FileUploadViewModel } from '../view-models/FileUploadViewModel';
 import type { CsvError } from '../../../domain/csv/errors/CsvErrors';
 
@@ -25,14 +26,14 @@ export function usePdfParser() {
   });
 
   const parsePdfFiles = useCallback(
-    async (files: FileUploadViewModel[]) => {
+    async (files: FileUploadViewModel[], layout: BpdPdfLayout = 'print') => {
       setState({ isParsing: true, error: null, warningCount: 0, results: null });
 
       const results: CsvParseResultDto[] = [];
       let warningCount = 0;
 
       for (const f of files) {
-        const res = await useCase.execute({ file: f.file });
+        const res = await useCase.execute({ file: f.file, layout });
         if (!res.success) {
           setState({ isParsing: false, error: res.error, warningCount, results: null });
           return;

@@ -50,7 +50,6 @@ let failures = 0;
 async function main(): Promise<void> {
   for (const browser of selectedBrowsers) {
     for (const device of selectedDevices) {
-      // eslint-disable-next-line no-console
       console.log(`\n=== BDD Visual: ${browser} | ${device} ===\n`);
 
       const env: NodeJS.ProcessEnv = {
@@ -71,7 +70,6 @@ async function main(): Promise<void> {
   }
 
   if (failures > 0) {
-    // eslint-disable-next-line no-console
     console.error(`\nBDD visual matrix finished with ${failures} failing run(s).\n`);
     process.exit(1);
   }
@@ -80,7 +78,6 @@ async function main(): Promise<void> {
 try {
   await main();
 } catch (err) {
-  // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
 }

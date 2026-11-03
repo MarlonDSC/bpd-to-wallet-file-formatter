@@ -14,9 +14,7 @@ import type { BpdUploadMode } from '../value-objects/BpdUploadMode';
 export class InvalidFileTypeError extends FileError {
   constructor(extension: string, mode: BpdUploadMode = 'bpd-csv') {
     const expected =
-      mode === 'bpd-csv'
-        ? 'Only CSV files are supported'
-        : 'Only PDF files are supported';
+      mode === 'bpd-csv' ? 'Only CSV files are supported' : 'Only PDF files are supported';
     super(`Invalid file type. ${expected}, but received: ${extension}`);
     this.name = 'InvalidFileTypeError';
   }

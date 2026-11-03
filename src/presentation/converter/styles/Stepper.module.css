@@ -89,6 +89,7 @@
   flex-direction: column;
   gap: 0.25rem;
   flex: 1;
+  min-width: 0;
   padding-top: 0.5rem;
 }
 
@@ -130,6 +131,7 @@
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.5);
   transition: color 0.2s ease;
+  overflow-wrap: anywhere;
 }
 
 @media (prefers-color-scheme: light) {

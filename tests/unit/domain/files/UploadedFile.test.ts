@@ -83,9 +83,19 @@ describe('UploadedFile', () => {
       expect(() => uploadedFile.validate()).toThrow(InvalidFileTypeError);
     });
 
-    it('should accept PDF in bpd-pdf mode', () => {
+    it('should accept PDF in bpd-pdf-print mode', () => {
       const uploadedFile = UploadedFile.fromFile(pdfFile);
-      expect(() => uploadedFile.validate('bpd-pdf')).not.toThrow();
+      expect(() => uploadedFile.validate('bpd-pdf-print')).not.toThrow();
+    });
+
+    it('should accept PDF in bpd-pdf-inbox mode', () => {
+      const uploadedFile = UploadedFile.fromFile(pdfFile);
+      expect(() => uploadedFile.validate('bpd-pdf-inbox')).not.toThrow();
+    });
+
+    it('should reject CSV in bpd-pdf-print mode', () => {
+      const uploadedFile = UploadedFile.fromFile(validFile);
+      expect(() => uploadedFile.validate('bpd-pdf-print')).toThrow(InvalidFileTypeError);
     });
 
     it('should reject PDF in default bpd-csv mode', () => {
