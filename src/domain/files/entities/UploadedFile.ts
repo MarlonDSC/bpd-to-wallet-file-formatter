@@ -5,7 +5,7 @@
 
 import { FileSize } from '../value-objects/FileSize';
 import { FileType } from '../value-objects/FileType';
-import type { BpdUploadMode } from '../value-objects/BpdUploadMode';
+import { isPdfUploadMode, type BpdUploadMode } from '../value-objects/BpdUploadMode';
 import { InvalidFileTypeError, FileTooLargeError, EmptyFileError } from '../errors/FileErrors';
 
 export interface UploadedFileProps {
@@ -107,8 +107,7 @@ export class UploadedFile {
       throw new EmptyFileError();
     }
 
-    const typeOk =
-      mode === 'bpd-csv' ? this.type.isCsv() : this.type.isPdf();
+    const typeOk = mode === 'bpd-csv' ? this.type.isCsv() : isPdfUploadMode(mode) && this.type.isPdf();
     if (!typeOk) {
       throw new InvalidFileTypeError(this.type.getExtension(), mode);
     }
