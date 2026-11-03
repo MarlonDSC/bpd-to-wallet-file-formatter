@@ -52,19 +52,18 @@ export function DateFilterPopup({
     };
   }, [onCancel]);
 
-  // Update selected filters when mode changes
-  useEffect(() => {
-    if (selectionMode === 'all') {
+  const handleModeChange = (mode: 'all' | 'select') => {
+    setSelectionMode(mode);
+    if (mode === 'all') {
       setSelectedFilters(filters.filter((f) => f.isAvailable));
     } else {
-      // Keep current selections when switching to select mode
       setSelectedFilters(
         initialSelectedFilters.filter((f) =>
           filters.some((filter) => filter.label === f.label)
         )
       );
     }
-  }, [selectionMode, filters, initialSelectedFilters]);
+  };
 
   const handleToggleFilter = (filter: DateFilterDto) => {
     if (!filter.isAvailable) return;
@@ -125,7 +124,7 @@ export function DateFilterPopup({
                 type="radio"
                 name="selection-mode"
                 checked={selectionMode === 'all'}
-                onChange={() => setSelectionMode('all')}
+                onChange={() => handleModeChange('all')}
                 className={styles.radioInput}
               />
               <span className={styles.radioText}>All</span>
@@ -142,7 +141,7 @@ export function DateFilterPopup({
                 type="radio"
                 name="selection-mode"
                 checked={selectionMode === 'select'}
-                onChange={() => setSelectionMode('select')}
+                onChange={() => handleModeChange('select')}
                 className={styles.radioInput}
               />
               <span className={styles.radioText}>Select</span>

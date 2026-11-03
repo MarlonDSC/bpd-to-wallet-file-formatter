@@ -2,7 +2,7 @@
  * useDateFilters - Hook to manage date filter options
  */
 
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState } from 'react';
 import { GetAvailableDateFiltersUseCase } from '../../../application/excel/use-cases/GetAvailableDateFiltersUseCase';
 import type { DateFilterDto } from '../../../application/excel/dtos/DateFilterDto';
 import type { TransactionDto } from '../../../application/transactions/dtos/TransactionDto';
@@ -22,62 +22,82 @@ export function useDateFilters(transactions: TransactionDto[]) {
     []
   );
 
-  const [state, setState] = useState<DateFiltersState>({
-    filters: [],
-    selectedFilter: null,
-    selectedFilters: [],
-    isLoading: false,
-    error: null,
-  });
-
-  // Load available filters when transactions change
-  useEffect(() => {
+  const { filters, error, defaultFilter } = useMemo(() => {
     if (transactions.length === 0) {
-      setState({
-        filters: [],
-        selectedFilter: null,
-        selectedFilters: [],
-        isLoading: false,
-        error: null,
-      });
-      return;
+      return {
+        filters: [] as DateFilterDto[],
+        error: null as DateFilterError | null,
+        defaultFilter: null as DateFilterDto | null,
+      };
     }
-
-    setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     const result = getAvailableFiltersUseCase.execute(transactions);
-
     if (result.success) {
-      // Set default filter to "All" if available
       const allFilter = result.data.find((f) => f.type === 'all');
-      setState({
+      return {
         filters: result.data,
-        selectedFilter: allFilter?.isAvailable ? allFilter : null,
-        selectedFilters: [],
-        isLoading: false,
-        error: null,
-      });
-    } else {
-      setState({
-        filters: [],
-        selectedFilter: null,
-        selectedFilters: [],
-        isLoading: false,
-        error: result.error,
-      });
+        error: null as DateFilterError | null,
+        defaultFilter: (allFilter?.isAvailable ? allFilter : null) as DateFilterDto | null,
+      };
     }
+
+    return {
+      filters: [] as DateFilterDto[],
+      error: result.error,
+      defaultFilter: null as DateFilterDto | null,
+    };
   }, [transactions, getAvailableFiltersUseCase]);
 
+  const [selection, setSelection] = useState<{
+    transactions: TransactionDto[];
+    selectedFilter: DateFilterDto | null;
+    selectedFilters: DateFilterDto[];
+  }>({
+    transactions,
+    selectedFilter: defaultFilter,
+    selectedFilters: [],
+  });
+
+  // Reset selection when the transactions input changes (adjust state during render).
+  if (selection.transactions !== transactions) {
+    setSelection({
+      transactions,
+      selectedFilter: defaultFilter,
+      selectedFilters: [],
+    });
+  }
+
+  const selectedFilter =
+    selection.transactions === transactions
+      ? selection.selectedFilter
+      : defaultFilter;
+  const selectedFilters =
+    selection.transactions === transactions ? selection.selectedFilters : [];
+
   const setSelectedFilter = (filter: DateFilterDto | null) => {
-    setState((prev) => ({ ...prev, selectedFilter: filter, selectedFilters: [] }));
+    setSelection((prev) => ({
+      ...prev,
+      transactions,
+      selectedFilter: filter,
+      selectedFilters: [],
+    }));
   };
 
-  const setSelectedFilters = (filters: DateFilterDto[]) => {
-    setState((prev) => ({ ...prev, selectedFilter: null, selectedFilters: filters }));
+  const setSelectedFilters = (nextFilters: DateFilterDto[]) => {
+    setSelection((prev) => ({
+      ...prev,
+      transactions,
+      selectedFilter: null,
+      selectedFilters: nextFilters,
+    }));
   };
 
   return {
-    ...state,
+    filters,
+    selectedFilter,
+    selectedFilters,
+    isLoading: false,
+    error,
     setSelectedFilter,
     setSelectedFilters,
   };
