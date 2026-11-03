@@ -124,4 +124,137 @@ describe('BpdPdfAdapter', () => {
     expect(out.rows[1].descripcion).not.toMatch(/fecha\s+fecha/i);
     expect(out.rows[1].descripcion).toContain('POS');
   });
+
+  describe('inbox (al corte) statement layout', () => {
+    const inboxHeader: string[][] = [
+      ['9 de julio de 2026'],
+      ['CTA CTE NOMINA TRANSACCIONAL', '833802887'],
+      ['FECHAS DE'],
+      ['No. DE CHEQUE', 'DETALLE', 'D É BITO RD$ CR É DITO RD$ BALANCE RD$'],
+      ['ENTRADA TRANSAC.'],
+    ];
+
+    it('rejects inbox grids when layout is print', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['16JUN 15JUN CLARO RECAR 8494100479 -50.00 6,948.81'],
+      ];
+      expect(() => adapter.adapt(grid, 'print')).toThrow(MissingColumnError);
+    });
+
+    it('uses TRANSAC date and negative debit amount', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['16JUN 15JUN CLARO RECAR 8494100479 SANT, O DOMINGO -50.00 6,948.81'],
+        ['616619504902 15062 POS W/D DD 00032348'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].fechaPosteo).toBe('15/06/2026');
+      expect(out.rows[0].montoTransaccion).toBe('-50');
+      expect(out.rows[0].descripcion).toContain('CLARO RECAR');
+      expect(out.rows[0].descripcion).toContain('8494100479');
+      expect(out.rows[0].descripcion).not.toMatch(/16JUN|15JUN/i);
+      expect(out.rows[0].descripcion).not.toContain('616619504902');
+    });
+
+    it('parses payroll-style credit (.00 + credit + balance)', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['15JUN 15JUN NOMINA 15 DE JUNIO 2026 RD$ .00', '47,045.00 47,798.81'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].fechaPosteo).toBe('15/06/2026');
+      expect(out.rows[0].montoTransaccion).toBe('47045');
+      expect(out.rows[0].descripcion).toContain('NOMINA');
+    });
+
+    it('parses positive credit without debit column zero', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['26JUN 26JUN MB desde 810421255 EDDY SUBUYU', '28,400.00 87,200.14'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].fechaPosteo).toBe('26/06/2026');
+      expect(out.rows[0].montoTransaccion).toBe('28400');
+      expect(out.rows[0].descripcion).toContain('MB desde');
+      expect(out.rows[0].descripcion).toContain('810421255');
+    });
+
+    it('skips BALANCE ANTERIOR and BALANCE AL CORTE', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['10JUN BALANCE ANTERIOR 53.81'],
+        ['11JUN 11JUN BANCO POPULAR OF PLAZA SA SANT, IAGO 616223435472 4,000.00 4,053.81'],
+        ['110626 DEP TACTE BPD1378'],
+        ['09JUL BALANCE AL CORTE', '11,956.44'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].fechaPosteo).toBe('11/06/2026');
+      expect(out.rows[0].montoTransaccion).toBe('4000');
+      expect(out.rows[0].descripcion).toContain('BANCO POPULAR');
+    });
+
+    it('continues after marketing block and page-2 header', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        ['22JUN 21JUN MB a 0808420129 HILDA E SOLARE -1,812.00 3,188.43'],
+        ['Uso de canales', 'D é bitos/Cr é ditos'],
+        ['Banca Digital'],
+        ['TELEBANCO POPULAR / SERVICIOS: 809-544-5555'],
+        ['Pag 2'],
+        ['MARLON DAVID SUBUYU CANTE 9 de julio de 2026'],
+        ['FECHAS DE'],
+        ['No. DE CHEQUE', 'DETALLE', 'D É BITO RD$ CR É DITO RD$ BALANCE RD$'],
+        ['ENTRADA TRANSAC.'],
+        ['01JUL 01JUL CARGO MENSUAL TD CLASICA -75.00 117,196.67'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(2);
+      expect(out.rows[0].fechaPosteo).toBe('21/06/2026');
+      expect(out.rows[0].descripcion).toContain('0808420129');
+      expect(out.rows[0].montoTransaccion).toBe('-1812');
+      expect(out.rows[1].fechaPosteo).toBe('01/07/2026');
+      expect(out.rows[1].montoTransaccion).toBe('-75');
+      expect(out.rows[1].descripcion).toContain('CARGO MENSUAL');
+    });
+
+    it('appends tax period date-range narrative to previous note', () => {
+      const grid: string[][] = [
+        ...inboxHeader,
+        [
+          '26JUN 26JUN PAGO IMPUESTO 0.15% DGII, 1 TRANS POR $ 1,812.00 Del -2.72 87,197.42',
+        ],
+        ['19/06/2026 Al 25/06/2026'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].montoTransaccion).toBe('-2.72');
+      expect(out.rows[0].descripcion).toContain('PAGO IMPUESTO');
+      expect(out.rows[0].descripcion).toContain('19/06/2026 Al 25/06/2026');
+    });
+
+    it('infers year from statement header for abbreviated dates', () => {
+      const grid: string[][] = [
+        ['10 de junio de 2026'],
+        ['No. DE CHEQUE', 'DETALLE', 'D É BITO RD$ CR É DITO RD$ BALANCE RD$'],
+        ['ENTRADA TRANSAC.'],
+        ['15MAY 15MAY NOMINA 15 DE MAYO 2026 RD$ .00', '47,045.00 47,227.38'],
+      ];
+
+      const out = adapter.adapt(grid, 'inbox');
+      expect(out.rows).toHaveLength(1);
+      expect(out.rows[0].fechaPosteo).toBe('15/05/2026');
+      expect(out.rows[0].montoTransaccion).toBe('47045');
+    });
+  });
 });
