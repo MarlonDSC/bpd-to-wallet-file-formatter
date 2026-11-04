@@ -40,7 +40,7 @@ export class DateFilterService {
     }
 
     const dateRange = this.getDateRangeForFilter(transactions, filterOption);
-    return this.filterByDateRange(transactions, dateRange);
+    return this.filterTransactionsByDateRange(transactions, dateRange);
   }
 
   /**
@@ -158,9 +158,12 @@ export class DateFilterService {
   }
 
   /**
-   * Filters transactions by date range
+   * Filters transactions by an explicit inclusive date range
    */
-  private filterByDateRange(transactions: Transaction[], dateRange: DateRange): Transaction[] {
+  filterTransactionsByDateRange(
+    transactions: Transaction[],
+    dateRange: DateRange
+  ): Transaction[] {
     return transactions.filter((transaction) => {
       const [day, month, year] = transaction.date.split('/').map(Number);
       const transactionDate = new Date(year, month - 1, day);
