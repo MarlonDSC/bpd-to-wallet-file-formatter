@@ -2,7 +2,7 @@
  * FileUpload - Component for file upload with drag-and-drop support
  */
 
-import { useRef, useEffect, useMemo } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFileUpload } from '../hooks/useFileUpload';
 import { useCsvParser } from '../hooks/useCsvParser';
 import { usePdfParser } from '../hooks/usePdfParser';
@@ -15,8 +15,6 @@ import {
 import { Stepper } from './Stepper';
 import { ConversionStatus } from './ConversionStatus';
 import { DataPreview, type DataPreviewHandle } from './DataPreview';
-import { ExcelExportSplitButton } from './ExcelExportSplitButton';
-import { ExcelMapper } from '../../../application/excel/mappers/ExcelMapper';
 import styles from '../styles/FileUpload.module.css';
 
 export function FileUpload() {
@@ -106,20 +104,6 @@ export function FileUpload() {
     if (isTransforming) return 'Transforming…';
     return 'Convert';
   };
-
-  // Prepare preview data when transactions are available
-  const previewData = useMemo(() => {
-    if (transactions.length === 0) {
-      return null;
-    }
-
-    try {
-      const workbook = ExcelMapper.toDomain(transactions);
-      return ExcelMapper.toViewModel(workbook);
-    } catch {
-      return null;
-    }
-  }, [transactions]);
 
   // Determine current step for stepper
   const isConversionComplete =
@@ -358,22 +342,37 @@ export function FileUpload() {
         </>
       )}
 
-      {/* Step 2: View & Download */}
-      {currentStep === 1 && previewData && (
+      {/* Step 2: Preview & Download */}
+      {currentStep === 1 && transactions.length > 0 && (
         <div className={styles.resultsSection}>
           <DataPreview
             ref={dataPreviewRef}
-            headers={previewData.headers}
-            rows={previewData.rows}
-          />
-          <ExcelExportSplitButton
             transactions={transactions}
             disabled={isParsing || isTransforming}
-            onViewTable={() => {
-              dataPreviewRef.current?.openSidebar();
-            }}
-            showViewTable={true}
           />
+          <button
+            type="button"
+            onClick={() => dataPreviewRef.current?.openSidebar()}
+            className={styles.previewExcelButton}
+            disabled={isParsing || isTransforming}
+            aria-label="Preview Excel"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            Preview Excel
+          </button>
           <button
             type="button"
             onClick={handleClear}
