@@ -5,6 +5,10 @@
   width: 100%;
 }
 
+.splitButtonContainerEmbedded {
+  margin-top: 0;
+}
+
 .splitButtonGroup {
   display: flex;
   align-items: stretch;
