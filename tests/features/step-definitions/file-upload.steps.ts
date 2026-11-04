@@ -251,12 +251,53 @@ Given('the file is displayed in the upload queue', async () => {
 });
 
 // When steps
+async function openDataPreviewSidebar(): Promise<void> {
+  if (!stepContext.page) throw new Error('Page not initialized');
+
+  const sidebar = stepContext.page.getByRole('dialog', { name: /data preview/i });
+  if (await sidebar.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  await expect(previewButton).toBeEnabled({ timeout: 10000 });
+  await previewButton.click();
+  await expect(sidebar).toBeVisible({ timeout: 5000 });
+}
+
 When('the user clicks the {string} button', async (buttonText: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
   if (buttonText === 'Choose Files') {
     stepContext.fileChooserPromise = stepContext.page.waitForEvent('filechooser');
     await stepContext.page.getByRole('button', { name: /choose files/i }).click();
+    return;
   }
+
+  if (buttonText === 'Convert') {
+    const button = stepContext.page.getByRole('button', { name: /convert/i });
+    await expect(button).toBeEnabled({ timeout: 10000 });
+    await button.click();
+    return;
+  }
+
+  if (buttonText === 'Download Excel') {
+    await openDataPreviewSidebar();
+    const downloadPromise = stepContext.page.waitForEvent('download', { timeout: 30000 });
+    const button = stepContext.page.getByRole('button', { name: /download excel/i });
+    await expect(button).toBeEnabled({ timeout: 10000 });
+    await button.click();
+    stepContext.downloadPromise = downloadPromise;
+    return;
+  }
+
+  if (buttonText === 'Preview Excel') {
+    await openDataPreviewSidebar();
+    return;
+  }
+
+  const button = stepContext.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
+  await expect(button).toBeEnabled({ timeout: 10000 });
+  await button.click();
 });
 
 When('the user selects a CSV file', async () => {
@@ -511,9 +552,10 @@ Given('a BPD CSV file with some invalid transaction rows', async () => {
 
 When('the user clicks {string} button', async (buttonText: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
   // Special handling for Download Excel button to set up download listener
   if (buttonText === 'Download Excel') {
+    await openDataPreviewSidebar();
     const downloadPromise = stepContext.page.waitForEvent('download', { timeout: 30000 });
     const button = stepContext.page.getByRole('button', { name: /download excel/i });
     await expect(button).toBeEnabled({ timeout: 10000 });
@@ -521,7 +563,12 @@ When('the user clicks {string} button', async (buttonText: string) => {
     stepContext.downloadPromise = downloadPromise;
     return;
   }
-  
+
+  if (buttonText === 'Preview Excel') {
+    await openDataPreviewSidebar();
+    return;
+  }
+
   // General button click handling
   const button = stepContext.page.getByRole('button', { name: new RegExp(buttonText, 'i') });
   await expect(button).toBeEnabled({ timeout: 10000 });

@@ -164,15 +164,16 @@ Given('an error occurs during Excel generation', async () => {
 // When steps
 When('the data preview is displayed', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
-  // Wait for data preview to appear
-  await expect(
-    stepContext.page.locator('text=/Data Preview/i')
-  ).toBeVisible({ timeout: 5000 });
-  
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  await expect(previewButton).toBeEnabled({ timeout: 10000 });
+  await previewButton.click();
+
+  const sidebar = stepContext.page.getByRole('dialog', { name: /data preview/i });
+  await expect(sidebar).toBeVisible({ timeout: 5000 });
+
   // Visual regression: Capture data preview
-  const previewSection = stepContext.page.locator('text=/Data Preview/i').locator('..');
-  await compareScreenshot(previewSection, 'bdd-data-preview', stepContext.visual);
+  await compareScreenshot(sidebar, 'bdd-data-preview', stepContext.visual);
 });
 
 // Note: 'the user clicks {string} button' step is defined in file-upload.steps.ts
@@ -345,19 +346,19 @@ Then('the file name includes a timestamp', async () => {
 
 Then('a table is shown with columns: {string}', async (columnsString: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
   // Wait for the table to be visible first
   const table = stepContext.page.locator('table[role="table"]');
   await expect(table).toBeVisible({ timeout: 5000 });
-  
+
   const expectedColumns = columnsString.split(',').map((c) => c.trim());
-  
+
   // Check table headers - use more specific selector within the table
   for (const column of expectedColumns) {
-    // Escape special regex characters
-    // NOSONAR: replace() with global regex is more compatible than replaceAll(), and String.raw breaks regex escaping
     const escapedColumn = column.replace(/[()]/g, '\\$&'); // NOSONAR
-    const header = table.locator('th').filter({ hasText: new RegExp(`^${escapedColumn}$`, 'i') }).first();
+    const header = table.getByRole('button', {
+      name: new RegExp(`^Sort by ${escapedColumn}$`, 'i'),
+    });
     await expect(header).toBeVisible({ timeout: 5000 });
   }
 });
@@ -366,20 +367,18 @@ Then('a table is shown with columns: {string}', async (columnsString: string) =>
 // NOSONAR: Cannot use String.raw here - Cucumber's step matcher requires escaped parentheses in regular strings
 Then('a table is shown with columns: Date, Date \\(Import\\), Note, Currency, Amount', async () => { // NOSONAR
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
   // Wait for the table to be visible first
   const table = stepContext.page.locator('table[role="table"]');
   await expect(table).toBeVisible({ timeout: 5000 });
-  
+
   const expectedColumns = ['Date', 'Date (Import)', 'Note', 'Currency', 'Amount'];
-  
-  // Check table headers - use more specific selector within the table
+
   for (const column of expectedColumns) {
-    // Escape special regex characters in column name
-    // NOSONAR: replace() with global regex is more compatible than replaceAll(), and String.raw breaks regex escaping
     const escapedColumn = column.replace(/[()]/g, '\\$&'); // NOSONAR
-    // Use exact match to avoid matching "Date" when looking for "Date (Import)"
-    const header = table.locator('th').filter({ hasText: new RegExp(`^${escapedColumn}$`, 'i') }).first();
+    const header = table.getByRole('button', {
+      name: new RegExp(`^Sort by ${escapedColumn}$`, 'i'),
+    });
     await expect(header).toBeVisible({ timeout: 5000 });
   }
 });

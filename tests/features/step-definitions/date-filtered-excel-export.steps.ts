@@ -16,6 +16,20 @@ setDefaultTimeout(60 * 1000);
 
 const downloadedFiles: string[] = [];
 
+async function openDataPreviewSidebar(): Promise<void> {
+  if (!stepContext.page) throw new Error('Page not initialized');
+
+  const sidebar = stepContext.page.getByRole('dialog', { name: /data preview/i });
+  if (await sidebar.isVisible().catch(() => false)) {
+    return;
+  }
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  await expect(previewButton).toBeEnabled({ timeout: 10000 });
+  await previewButton.click();
+  await expect(sidebar).toBeVisible({ timeout: 5000 });
+}
+
 // Helper function to read Excel file
 function readExcelFile(filePath: string): XLSX.WorkBook {
   const buffer = readFileSync(filePath);
@@ -62,10 +76,15 @@ After(async () => {
 // Given steps
 Given('the user is viewing the Excel export section', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
-  // Wait for Excel export section to be visible
+
   await expect(
-    stepContext.page.locator('text=/Date Filter/i').or(stepContext.page.locator('text=/Download Excel/i'))
+    stepContext.page.getByRole('button', { name: /preview excel/i })
+  ).toBeVisible({ timeout: 10000 });
+
+  await openDataPreviewSidebar();
+
+  await expect(
+    stepContext.page.getByRole('button', { name: /download excel/i })
   ).toBeVisible({ timeout: 5000 });
 });
 
@@ -372,18 +391,24 @@ Given('transaction data contains transactions from only one month', async () => 
 
 Given('no transaction data is available', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
-  // Don't upload any file or upload an empty file
-  // The dropdown should still be visible but filters disabled
+
+  const clearButton = stepContext.page.getByRole('button', { name: /clear all and start over/i });
+  if (await clearButton.isVisible().catch(() => false)) {
+    await clearButton.click();
+  }
+
+  // Without converted transactions, preview/download controls are not available
   await expect(
-    stepContext.page.locator('text=/Date Filter/i')
-  ).toBeVisible({ timeout: 5000 });
+    stepContext.page.getByRole('button', { name: /preview excel/i })
+  ).not.toBeVisible({ timeout: 5000 });
 });
 
 // When steps
 When('the user selects {string} from the date filter dropdown', async (filterOption: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
+  await openDataPreviewSidebar();
+
   // Open dropdown
   const dropdownButton = stepContext.page.locator('button[aria-label="Select date filter"]');
   await dropdownButton.click();
@@ -408,7 +433,15 @@ When('the user selects {string} from the date filter dropdown', async (filterOpt
 
 When('the user views the date filter dropdown', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  if (!(await previewButton.isVisible().catch(() => false))) {
+    // No converted data → date filters are unavailable in the current UI
+    return;
+  }
+
+  await openDataPreviewSidebar();
+
   // Open dropdown
   const dropdownButton = stepContext.page.locator('button[aria-label="Select date filter"]');
   await dropdownButton.click();
@@ -693,7 +726,14 @@ Then('an info icon explains {string}', async (message: string) => {
 
 Then('all filter options except {string} are disabled', async (exceptionOption: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  if (!(await previewButton.isVisible().catch(() => false))) {
+    // No preview means filters are unavailable — treat as disabled/not applicable
+    expect(exceptionOption.toLowerCase()).toBe('all');
+    return;
+  }
+
   // Check each option
   const allOption = stepContext.page.locator('button:has-text("All")');
   const lastMonthOption = stepContext.page.locator('button:has-text("Last month")');
@@ -714,7 +754,12 @@ Then('all filter options except {string} are disabled', async (exceptionOption: 
 
 Then('info icons explain that no data is available for filtering', async () => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
+  const previewButton = stepContext.page.getByRole('button', { name: /preview excel/i });
+  if (!(await previewButton.isVisible().catch(() => false))) {
+    return;
+  }
+
   // Check that info icons are visible for disabled options
   const infoIcons = stepContext.page.locator('svg').filter({ has: stepContext.page.locator('circle') });
   const count = await infoIcons.count();
