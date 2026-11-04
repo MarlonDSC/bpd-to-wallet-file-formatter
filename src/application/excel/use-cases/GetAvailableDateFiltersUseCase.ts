@@ -75,7 +75,10 @@ export class GetAvailableDateFiltersUseCase {
       // Get available weeks
       const availableWeeks = this.dateFilterService.getAvailableWeeks(transactions);
       availableWeeks.forEach(({ year, weekNumber }) => {
-        filters.push(DateFilterOption.createByWeek(year, weekNumber, true));
+        const rangeDisplay = this.formatWeekDateRange(year, weekNumber);
+        filters.push(
+          DateFilterOption.createByWeek(year, weekNumber, true, undefined, rangeDisplay)
+        );
       });
 
       // Check "Last week" availability
@@ -85,22 +88,16 @@ export class GetAvailableDateFiltersUseCase {
       );
       const { year: lastWeekYear, weekNumber: lastWeekNumber } =
         this.dateCalculationService.getLastWeek();
-      // Add metadata for last week filter
-      if (lastWeekAvailability.isAvailable) {
-        const lastWeekFilter = new DateFilterOption({
-          type: 'last-week',
-          label: 'Last week',
-          isAvailable: true,
-          metadata: { year: lastWeekYear, weekNumber: lastWeekNumber },
-        });
-        filters.push(lastWeekFilter);
-      } else {
-        const lastWeekFilter = DateFilterOption.createLastWeek(
-          false,
-          lastWeekAvailability.reason
-        );
-        filters.push(lastWeekFilter);
-      }
+      const lastWeekRangeDisplay = this.formatWeekDateRange(lastWeekYear, lastWeekNumber);
+      filters.push(
+        DateFilterOption.createLastWeek(
+          lastWeekYear,
+          lastWeekNumber,
+          lastWeekAvailability.isAvailable,
+          lastWeekAvailability.reason,
+          lastWeekRangeDisplay
+        )
+      );
 
       // Convert to DTOs
       const dtos = filters.map((filter) => DateFilterMapper.toDto(filter));
@@ -118,5 +115,17 @@ export class GetAvailableDateFiltersUseCase {
             : new Error(String(error)) as DateFilterError,
       };
     }
+  }
+
+  private formatWeekDateRange(year: number, weekNumber: number): string {
+    const { startDate, endDate } = this.dateCalculationService.getWeekRange(
+      year,
+      weekNumber
+    );
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+    });
+    return `${formatter.format(startDate)} – ${formatter.format(endDate)}`;
   }
 }

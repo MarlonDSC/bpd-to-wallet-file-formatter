@@ -129,11 +129,13 @@ export class DateFilterOption {
     year: number,
     weekNumber: number,
     isAvailable: boolean,
-    unavailableReason?: string
+    unavailableReason?: string,
+    dateRangeDisplay?: string
   ): DateFilterOption {
+    const weekId = `${year}_W${weekNumber}`;
     return new DateFilterOption({
       type: 'by-week',
-      label: `${year}_W${weekNumber}`,
+      label: dateRangeDisplay ? `${weekId} (${dateRangeDisplay})` : weekId,
       isAvailable,
       unavailableReason,
       metadata: { year, weekNumber },
@@ -144,14 +146,20 @@ export class DateFilterOption {
    * Creates a "Last week" filter option
    */
   static createLastWeek(
+    year: number,
+    weekNumber: number,
     isAvailable: boolean,
-    unavailableReason?: string
+    unavailableReason?: string,
+    dateRangeDisplay?: string
   ): DateFilterOption {
+    const weekId = `${year}_W${weekNumber}`;
+    const weekPart = dateRangeDisplay ? `${weekId}, ${dateRangeDisplay}` : weekId;
     return new DateFilterOption({
       type: 'last-week',
-      label: 'Last week',
+      label: `Last week (${weekPart})`,
       isAvailable,
       unavailableReason,
+      metadata: { year, weekNumber },
     });
   }
 
