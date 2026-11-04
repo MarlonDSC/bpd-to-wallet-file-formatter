@@ -15,6 +15,10 @@ export interface DateFilterDropdownProps {
   onSelectFilter: (filter: DateFilterDto) => void;
   onSelectFilters?: (filters: DateFilterDto[]) => void; // For multi-selection
   disabled?: boolean;
+  /** When true, shows a Custom option that enables manual date-range editing */
+  showCustomOption?: boolean;
+  isCustomSelected?: boolean;
+  onSelectCustom?: () => void;
 }
 
 export function DateFilterDropdown({
@@ -24,6 +28,9 @@ export function DateFilterDropdown({
   onSelectFilter,
   onSelectFilters,
   disabled = false,
+  showCustomOption = false,
+  isCustomSelected = false,
+  onSelectCustom,
 }: Readonly<DateFilterDropdownProps>) {
   const [isOpen, setIsOpen] = useState(false);
   const [popupType, setPopupType] = useState<'by-month' | 'by-fortnightly-pay' | 'by-week' | null>(null);
@@ -60,6 +67,11 @@ export function DateFilterDropdown({
     }
   };
 
+  const handleSelectCustom = () => {
+    onSelectCustom?.();
+    setIsOpen(false);
+  };
+
   const handleOpenPopup = (type: 'by-month' | 'by-fortnightly-pay' | 'by-week') => {
     setIsOpen(false);
     setPopupType(type);
@@ -77,14 +89,18 @@ export function DateFilterDropdown({
   };
 
   const getDisplayLabel = (): string => {
-    if (popupType && selectedFilters.length > 0) {
+    if (isCustomSelected) {
+      return 'Custom';
+    }
+    if (selectedFilters.length > 0) {
       if (selectedFilters.length === 1) {
         return selectedFilters[0].label;
       }
+      const firstType = selectedFilters[0]?.type;
       let typeLabel = 'weeks';
-      if (popupType === 'by-month') {
+      if (firstType === 'by-month') {
         typeLabel = 'months';
-      } else if (popupType === 'by-fortnightly-pay') {
+      } else if (firstType === 'by-fortnightly-pay') {
         typeLabel = 'pay periods';
       }
       return `${selectedFilters.length} ${typeLabel} selected`;
@@ -158,7 +174,7 @@ export function DateFilterDropdown({
               onClick={() => handleSelectFilter(allFilter)}
               disabled={!allFilter.isAvailable}
               className={`${styles.menuItem} ${
-                selectedFilter?.type === 'all' ? styles.menuItemSelected : ''
+                !isCustomSelected && selectedFilter?.type === 'all' ? styles.menuItemSelected : ''
               } ${allFilter.isAvailable ? '' : styles.menuItemDisabled}`}
             >
               <span>{allFilter.label}</span>
@@ -175,7 +191,9 @@ export function DateFilterDropdown({
               onClick={() => handleSelectFilter(lastMonthFilter)}
               disabled={!lastMonthFilter.isAvailable}
               className={`${styles.menuItem} ${
-                selectedFilter?.type === 'last-month' ? styles.menuItemSelected : ''
+                !isCustomSelected && selectedFilter?.type === 'last-month'
+                  ? styles.menuItemSelected
+                  : ''
               } ${lastMonthFilter.isAvailable ? '' : styles.menuItemDisabled}`}
             >
               <span>{lastMonthFilter.label}</span>
@@ -190,10 +208,14 @@ export function DateFilterDropdown({
             <button
               type="button"
               onClick={() => handleOpenPopup('by-month')}
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${
+                !isCustomSelected && selectedFilters.some((f) => f.type === 'by-month')
+                  ? styles.menuItemSelected
+                  : ''
+              }`}
             >
               <span>By month</span>
-              {selectedFilters.some((f) => f.type === 'by-month') && (
+              {!isCustomSelected && selectedFilters.some((f) => f.type === 'by-month') && (
                 <span className={styles.badge}>
                   {selectedFilters.filter((f) => f.type === 'by-month').length}
                 </span>
@@ -206,14 +228,20 @@ export function DateFilterDropdown({
             <button
               type="button"
               onClick={() => handleOpenPopup('by-fortnightly-pay')}
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${
+                !isCustomSelected &&
+                selectedFilters.some((f) => f.type === 'by-fortnightly-pay')
+                  ? styles.menuItemSelected
+                  : ''
+              }`}
             >
               <span>By fortnightly pay</span>
-              {selectedFilters.some((f) => f.type === 'by-fortnightly-pay') && (
-                <span className={styles.badge}>
-                  {selectedFilters.filter((f) => f.type === 'by-fortnightly-pay').length}
-                </span>
-              )}
+              {!isCustomSelected &&
+                selectedFilters.some((f) => f.type === 'by-fortnightly-pay') && (
+                  <span className={styles.badge}>
+                    {selectedFilters.filter((f) => f.type === 'by-fortnightly-pay').length}
+                  </span>
+                )}
             </button>
           )}
 
@@ -222,11 +250,15 @@ export function DateFilterDropdown({
             <button
               type="button"
               onClick={() => handleOpenPopup('by-week')}
-              className={styles.menuItem}
+              className={`${styles.menuItem} ${
+                !isCustomSelected && selectedFilters.some((f) => f.type === 'by-week')
+                  ? styles.menuItemSelected
+                  : ''
+              }`}
             >
               <span>By week</span>
-              {selectedFilters.some((f) => f.type === 'by-week') && (
-                <span>
+              {!isCustomSelected && selectedFilters.some((f) => f.type === 'by-week') && (
+                <span className={styles.badge}>
                   {selectedFilters.filter((f) => f.type === 'by-week').length}
                 </span>
               )}
@@ -240,13 +272,27 @@ export function DateFilterDropdown({
               onClick={() => handleSelectFilter(lastWeekFilter)}
               disabled={!lastWeekFilter.isAvailable}
               className={`${styles.menuItem} ${
-                selectedFilter?.type === 'last-week' ? styles.menuItemSelected : ''
+                !isCustomSelected && selectedFilter?.type === 'last-week'
+                  ? styles.menuItemSelected
+                  : ''
               } ${lastWeekFilter.isAvailable ? '' : styles.menuItemDisabled}`}
             >
               <span>{lastWeekFilter.label}</span>
               {!lastWeekFilter.isAvailable && lastWeekFilter.unavailableReason && (
                 <FilterInfoTooltip reason={lastWeekFilter.unavailableReason} />
               )}
+            </button>
+          )}
+
+          {showCustomOption && (
+            <button
+              type="button"
+              onClick={handleSelectCustom}
+              className={`${styles.menuItem} ${
+                isCustomSelected ? styles.menuItemSelected : ''
+              }`}
+            >
+              <span>Custom</span>
             </button>
           )}
         </div>

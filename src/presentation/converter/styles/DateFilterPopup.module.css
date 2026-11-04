@@ -147,6 +147,8 @@
 .checkboxText {
   font-size: 0.9375rem;
   color: var(--color-text, #111827);
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .popupFooter {
