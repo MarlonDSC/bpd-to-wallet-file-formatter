@@ -15,6 +15,7 @@ export class TransactionMapper {
    */
   static toDomain(csvRow: CsvRowDto): Transaction {
     const date = TransactionDate.fromString(csvRow.fechaPosteo);
+    // Date (Import) = date + 1 day to offset Wallet's on-import day decrement
     const dateImport = date.toImportDate();
     const amount = Amount.fromString(csvRow.montoTransaccion);
     const currency = Currency.DOP();

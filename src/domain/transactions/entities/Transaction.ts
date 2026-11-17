@@ -9,6 +9,7 @@ import { Currency } from '../value-objects/Currency';
 
 export class Transaction {
   public readonly date: TransactionDate;
+  /** Wallet import date: transaction date + 1 day (offsets Wallet's on-import day decrement) */
   public readonly dateImport: TransactionDate;
   public readonly note: string;
   public readonly currency: Currency;

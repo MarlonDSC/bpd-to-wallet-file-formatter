@@ -89,7 +89,7 @@ export class BrowserExcelGeneratorService implements ExcelGeneratorService {
         }
 
         // Column 0: Date (DD/MM/YYYY)
-        // Column 1: Date (Import) (DD/MM/YYYY)
+        // Column 1: Date (Import) — date + 1 day to offset Wallet's on-import day decrement
         if (col === 0 || col === 1) {
           // Parse date string (DD/MM/YYYY) to Date object
           const dateString = String(cell.v);

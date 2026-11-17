@@ -5,7 +5,8 @@
 
 export class ExcelRow {
   public readonly date: string; // DD/MM/YYYY format
-  public readonly dateImport: string; // DD/MM/YYYY format
+  /** Wallet import date (DD/MM/YYYY): date + 1 day to offset Wallet's day decrement */
+  public readonly dateImport: string;
   public readonly note: string;
   public readonly currency: string; // "DOP"
   public readonly amount: number; // Number with 2 decimal places

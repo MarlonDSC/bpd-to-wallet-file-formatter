@@ -47,7 +47,10 @@ export class TransactionDate {
   }
 
   /**
-   * Returns the import date (transaction date + 1 day)
+   * Returns the Wallet import date (transaction date + 1 day).
+   *
+   * Workaround: the Wallet app decreases dates by one day on import
+   * (likely a Wallet-side bug). Pre-incrementing keeps the final date correct.
    */
   toImportDate(): TransactionDate {
     return this.addDays(1);
