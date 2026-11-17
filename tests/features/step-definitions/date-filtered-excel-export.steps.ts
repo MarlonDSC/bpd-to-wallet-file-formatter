@@ -452,26 +452,6 @@ When('the user views the date filter dropdown', async () => {
   ).toBeVisible({ timeout: 2000 });
 });
 
-When('a popup appears with {string} radio button and {string} checklist', async (allOption: string, selectOption: string) => {
-  if (!stepContext.page) throw new Error('Page not initialized');
-  
-  // Wait for popup to appear
-  await expect(
-    stepContext.page.locator(`text=/${allOption}/i`)
-  ).toBeVisible({ timeout: 2000 });
-  
-  await expect(
-    stepContext.page.locator(`text=/${selectOption}/i`)
-  ).toBeVisible({ timeout: 2000 });
-  
-  // Verify radio buttons exist
-  const allRadio = stepContext.page.locator('input[type="radio"][name="selection-mode"]').first();
-  const selectRadio = stepContext.page.locator('input[type="radio"][name="selection-mode"]').nth(1);
-  
-  await expect(allRadio).toBeVisible();
-  await expect(selectRadio).toBeVisible();
-});
-
 When('the user selects {string} from the month checklist', async (monthLabel: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
   
@@ -666,14 +646,20 @@ When('no items are checked in the checklist', async () => {
 // Then steps
 Then('a popup appears with {string} radio button and {string} checklist', async (allOption: string, selectOption: string) => {
   if (!stepContext.page) throw new Error('Page not initialized');
-  
+
   await expect(
     stepContext.page.locator(`text=/${allOption}/i`)
   ).toBeVisible({ timeout: 2000 });
-  
+
   await expect(
     stepContext.page.locator(`text=/${selectOption}/i`)
   ).toBeVisible({ timeout: 2000 });
+
+  const allRadio = stepContext.page.locator('input[type="radio"][name="selection-mode"]').first();
+  const selectRadio = stepContext.page.locator('input[type="radio"][name="selection-mode"]').nth(1);
+
+  await expect(allRadio).toBeVisible();
+  await expect(selectRadio).toBeVisible();
 });
 
 Then('{string} option is disabled', async (optionName: string) => {

@@ -432,8 +432,8 @@ Then('the user can review the data before downloading', async () => {
   ).toBeVisible({ timeout: 5000 });
 });
 
-// Exact match for "Date column is formatted as DD/MM/YYYY" (Cucumber escapes slashes)
-Then(String.raw`Date column is formatted as DD/MM/YYYY`, async () => {
+// Escape `/` (Cucumber alternative) and `()` (optional text) in the expression
+Then(String.raw`Date column is formatted as DD\/MM\/YYYY`, async () => {
   if (!stepContext.downloadedFilePath) {
     throw new Error('Excel file not downloaded');
   }
@@ -456,9 +456,7 @@ Then(String.raw`Date column is formatted as DD/MM/YYYY`, async () => {
   }
 });
 
-// Exact match for "Date (Import) column is formatted as DD/MM/YYYY" (Cucumber escapes parentheses and slashes)
-// NOSONAR: Cannot use String.raw here - Cucumber's step matcher requires escaped parentheses in regular strings
-Then('Date \\(Import\\) column is formatted as DD/MM/YYYY', async () => { // NOSONAR
+Then(String.raw`Date \(Import\) column is formatted as DD\/MM\/YYYY`, async () => {
   if (!stepContext.downloadedFilePath) {
     throw new Error('Excel file not downloaded');
   }
