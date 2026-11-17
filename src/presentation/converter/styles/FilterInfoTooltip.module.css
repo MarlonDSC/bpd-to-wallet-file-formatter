@@ -2,7 +2,10 @@
   position: relative;
   display: inline-flex;
   align-items: center;
-  margin-left: 0.5rem;
+  margin-left: 0.25rem;
+  padding: 0;
+  border: none;
+  background: none;
   cursor: help;
   flex-shrink: 0;
   overflow: visible;

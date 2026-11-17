@@ -397,6 +397,12 @@
   width: 100%;
 }
 
+.headerCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+}
+
 .sortButton {
   display: inline-flex;
   align-items: center;

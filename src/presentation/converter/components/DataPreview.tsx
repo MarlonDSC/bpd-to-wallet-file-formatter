@@ -26,10 +26,22 @@ import {
   DateRangeCalendar,
   type DateRangeValue,
 } from './DateRangeCalendar';
+import { FilterInfoTooltip } from './FilterInfoTooltip';
 
-const PREVIEW_HEADERS: Array<{ key: SortColumn; label: string }> = [
+/**
+ * Wallet decreases imported dates by one day (likely a Wallet-side bug).
+ * We store Date + 1 day so the date lands correctly after import.
+ */
+const DATE_IMPORT_TOOLTIP =
+  'Transaction date + 1 day. Wallet decreases dates by one day on import, so we pre-increment to compensate.';
+
+const PREVIEW_HEADERS: Array<{
+  key: SortColumn;
+  label: string;
+  tooltip?: string;
+}> = [
   { key: 'date', label: 'Date' },
-  { key: 'dateImport', label: 'Date (Import)' },
+  { key: 'dateImport', label: 'Date (Import)', tooltip: DATE_IMPORT_TOOLTIP },
   { key: 'note', label: 'Note' },
   { key: 'currency', label: 'Currency' },
   { key: 'amount', label: 'Amount' },
@@ -498,19 +510,22 @@ export const DataPreview = forwardRef<DataPreviewHandle, DataPreviewProps>(
                     >
                       <thead>
                         <tr>
-                          {PREVIEW_HEADERS.map(({ key, label }) => (
+                          {PREVIEW_HEADERS.map(({ key, label, tooltip }) => (
                             <th key={key} className={styles.tableHeader}>
-                              <button
-                                type="button"
-                                className={styles.sortButton}
-                                onClick={() => handleSort(key)}
-                                aria-label={`Sort by ${label}`}
-                              >
-                                {label}
-                                <span className={styles.sortIndicator} aria-hidden="true">
-                                  {sortIndicator(key)}
-                                </span>
-                              </button>
+                              <div className={styles.headerCell}>
+                                <button
+                                  type="button"
+                                  className={styles.sortButton}
+                                  onClick={() => handleSort(key)}
+                                  aria-label={`Sort by ${label}`}
+                                >
+                                  {label}
+                                  <span className={styles.sortIndicator} aria-hidden="true">
+                                    {sortIndicator(key)}
+                                  </span>
+                                </button>
+                                {tooltip ? <FilterInfoTooltip reason={tooltip} /> : null}
+                              </div>
                             </th>
                           ))}
                         </tr>
